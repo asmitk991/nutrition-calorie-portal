@@ -1,268 +1,211 @@
 .page {
-  width: min(1380px, calc(100% - 32px));
+  width: min(1440px, calc(100% - 32px));
   margin: 0 auto;
-  padding: 24px 0 88px;
+  padding: 28px 0 84px;
   display: flex;
   flex-direction: column;
   gap: 22px;
 }
 
-.topbar {
+.topbar,
+.heroActions,
+.topbarMeta,
+.panelHeader,
+.formActions {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 16px;
-  padding: 12px 0 4px;
-  animation: fadeInUp 500ms ease;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.topbar {
+  justify-content: space-between;
+  animation: fadeInUp 420ms ease;
 }
 
 .brandLockup {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
 }
 
 .brandMark {
-  width: 52px;
-  height: 52px;
+  width: 56px;
+  height: 56px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 16px;
-  background: var(--swiggy-orange);
+  border-radius: 18px;
+  background: linear-gradient(145deg, #ff7a33 0%, var(--swiggy-orange) 55%, #c53b00 100%);
   color: var(--paper);
-  font-size: 1rem;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  box-shadow: 0 18px 36px rgba(255, 82, 0, 0.28);
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  letter-spacing: 0.18em;
+  font-weight: 700;
+  box-shadow: 0 20px 40px rgba(255, 82, 0, 0.28);
 }
 
 .brandLockup strong {
   display: block;
   font-size: 1rem;
-  font-weight: 800;
-}
-
-.brandLockup span,
-.topbarMeta span {
-  color: var(--smoke);
-  font-size: 0.94rem;
-}
-
-.topbarMeta {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.topbarMeta span {
-  border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.8);
-  border-radius: 999px;
-  padding: 10px 14px;
-}
-
-.hero,
-.panel,
-.workbench,
-.signalCard,
-.storyCard,
-.featureCard,
-.imageCard,
-.metricCard,
-.heroRailCard,
-.heroRailCardDark,
-.heroMiniStat {
-  border: 1px solid var(--line);
-  background: var(--paper);
-  box-shadow: var(--shadow-soft);
-}
-
-.hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.85fr);
-  gap: 18px;
-  animation: fadeInUp 680ms ease;
-}
-
-.heroMain {
-  position: relative;
-  overflow: hidden;
-  border-radius: 36px;
-  background:
-    radial-gradient(circle at top right, rgba(255, 255, 255, 0.12), transparent 24%),
-    linear-gradient(135deg, #111214 0%, #0f0f10 52%, #1f2024 100%);
-  color: var(--paper);
-  padding: 40px;
-  min-height: 560px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.heroMain::after {
-  content: "";
-  position: absolute;
-  width: 280px;
-  height: 280px;
-  right: -80px;
-  bottom: -80px;
-  border-radius: 50%;
-  background: rgba(255, 82, 0, 0.12);
-  filter: blur(10px);
-}
-
-.heroRail {
-  display: grid;
-  gap: 14px;
-}
-
-.heroRailCard,
-.heroRailCardDark {
-  border-radius: 28px;
-  padding: 24px;
-}
-
-.heroRailCard {
-  background: linear-gradient(180deg, #fff5ef 0%, #ffffff 100%);
-}
-
-.heroRailCardDark {
-  background: linear-gradient(180deg, #161719 0%, #0f0f10 100%);
-  color: var(--paper);
-  box-shadow: var(--shadow-strong);
-}
-
-.heroRailCard span,
-.heroRailCardDark span,
-.heroMiniStat span,
-.signalCard span,
-.metricCard span,
-.featureTag,
-.kicker,
-.panelEyebrow {
-  display: inline-flex;
-  width: fit-content;
-  color: var(--smoke);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
   font-weight: 700;
 }
 
-.heroRailCardDark span {
-  color: rgba(255, 255, 255, 0.74);
-}
-
-.heroRailCard strong,
-.heroRailCardDark strong,
-.heroMiniStat strong,
-.signalCard strong,
-.metricCard strong,
-.featureStats strong {
-  display: block;
-  margin-top: 10px;
-  font-size: 1.9rem;
-  line-height: 1.05;
-  font-weight: 900;
-}
-
-.heroRailCard p,
-.heroRailCardDark p,
-.heroMiniStat p,
-.signalCard p,
-.metricCard p,
+.brandLockup span,
+.topbarMeta span,
+.heroText,
+.sectionHeading p,
+.dashboardStat p,
+.statusRow p,
+.confidenceCard p,
+.workflowCard p,
+.rankedCard p,
 .storyCard p,
 .featureCard p,
-.imageCard figcaption,
-.heroText,
-.heroFootnote span,
-.sectionHeading p,
-.subText,
+.metricCard p,
+.uploadBox span,
 .batchHint,
-.uploadBox span {
-  margin-top: 10px;
+.subText,
+.imageCard figcaption,
+.table td {
   color: var(--smoke);
   line-height: 1.6;
 }
 
-.heroRailCardDark p {
-  color: rgba(255, 255, 255, 0.76);
+.topbarMeta {
+  justify-content: flex-end;
 }
 
-.heroRailGrid {
+.topbarMeta span {
+  padding: 11px 15px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 15, 16, 0.1);
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(12px);
+}
+
+.commandDeck,
+.dashboardGrid,
+.bottomGrid,
+.workbenchGrid,
+.metricRow,
+.confidenceGrid,
+.featureGridCompact,
+.storyGrid,
+.featureGrid,
+.imageGrid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  gap: 18px;
 }
 
-.heroMiniStat {
-  border-radius: 24px;
-  padding: 20px;
+.commandDeck {
+  grid-template-columns: minmax(0, 1.5fr) minmax(320px, 0.8fr);
+  animation: fadeInUp 560ms ease;
+}
+
+.heroPanel,
+.sidebarCard,
+.sidebarCardDark,
+.panel,
+.workbench,
+.dashboardStat,
+.confidenceCard,
+.workflowCard,
+.rankedCard,
+.storyCard,
+.featureCard,
+.imageCard,
+.metricCard,
+.signalCard {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(15, 15, 16, 0.08);
+  box-shadow: var(--shadow-soft);
+}
+
+.heroPanel {
+  min-height: 560px;
+  padding: 34px;
+  border-radius: 36px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.14), transparent 22%),
+    radial-gradient(circle at bottom left, rgba(255, 82, 0, 0.18), transparent 28%),
+    linear-gradient(145deg, #0d0d0e 0%, #151518 48%, #23160f 100%);
+  color: var(--paper);
+}
+
+.heroPanel::after {
+  content: "";
+  position: absolute;
+  inset: auto -90px -90px auto;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 82, 0, 0.28) 0%, rgba(255, 82, 0, 0) 72%);
+  filter: blur(8px);
+}
+
+.heroCopy {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.kicker,
+.panelEyebrow,
+.featureTag {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  padding: 9px 14px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
 .kicker,
 .panelEyebrow {
-  padding: 10px 14px;
-  border-radius: 999px;
-  background: rgba(255, 82, 0, 0.12);
+  background: rgba(255, 82, 0, 0.1);
   color: var(--swiggy-orange-strong);
 }
 
-.heroMain .kicker {
+.heroPanel .kicker {
   background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.88);
+  color: rgba(255, 255, 255, 0.86);
 }
 
-.heroMain h1,
-.sectionHeading h2 {
-  line-height: 0.95;
+.heroPanel h1,
+.sectionHeading h2,
+.sidebarCard h2,
+.sidebarCardDark h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 0.96;
   letter-spacing: -0.05em;
-  font-weight: 900;
 }
 
-.heroMain h1 {
+.heroPanel h1 {
   max-width: 10ch;
-  font-size: clamp(3.3rem, 8vw, 6.8rem);
+  font-size: clamp(3.3rem, 7vw, 6.6rem);
 }
 
 .heroText {
   max-width: 60ch;
-  color: rgba(255, 255, 255, 0.74);
+  color: rgba(255, 255, 255, 0.72);
   font-size: 1.04rem;
 }
 
-.heroActions,
-.formActions,
-.panelHeader {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  justify-content: space-between;
-}
-
 .heroActions {
-  justify-content: flex-start;
-}
-
-.heroFootnote {
   position: relative;
-  padding-top: 16px;
-}
-
-.heroFootnote::before {
-  content: "";
-  display: block;
-  width: 84px;
-  height: 2px;
-  background: rgba(255, 255, 255, 0.22);
-  margin-bottom: 12px;
-}
-
-.heroFootnote span {
-  color: rgba(255, 255, 255, 0.58);
+  z-index: 1;
 }
 
 .primaryButton,
@@ -273,8 +216,13 @@
   justify-content: center;
   border-radius: 999px;
   border: 1px solid transparent;
-  transition: transform 180ms ease, background 180ms ease, color 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
   cursor: pointer;
+  transition:
+    transform 180ms ease,
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease;
   font-weight: 700;
 }
 
@@ -283,13 +231,13 @@
   padding: 14px 24px;
   background: var(--swiggy-orange);
   color: var(--paper);
-  box-shadow: 0 18px 32px rgba(255, 82, 0, 0.26);
+  box-shadow: 0 18px 30px rgba(255, 82, 0, 0.28);
 }
 
 .secondaryButton,
 .inlineButton {
-  background: transparent;
-  border-color: var(--line-strong);
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(15, 15, 16, 0.12);
   color: var(--ink);
 }
 
@@ -299,102 +247,252 @@
 }
 
 .inlineButton {
-  padding: 8px 12px;
+  padding: 9px 13px;
 }
 
-.signalStrip,
-.metricRow,
-.workbenchGrid,
-.storyGrid,
-.featureGrid,
-.imageGrid {
-  display: grid;
-  gap: 16px;
-}
-
-.signalStrip {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  animation: fadeInUp 840ms ease;
-}
-
-.signalCard {
-  border-radius: 28px;
-  padding: 24px;
+.heroStatsRow {
   position: relative;
-  overflow: hidden;
-}
-
-.signalCard::after {
-  content: "";
-  position: absolute;
-  right: -24px;
-  bottom: -24px;
-  width: 92px;
-  height: 92px;
-  border-radius: 50%;
-  background: rgba(255, 82, 0, 0.08);
-}
-
-.metricRow {
+  z-index: 1;
+  display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
 }
 
-.metricCard {
-  border-radius: 28px;
-  padding: 24px;
+.dashboardStat {
+  min-height: 172px;
+  padding: 22px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(18px);
+  box-shadow: none;
 }
 
-.workbench,
-.panel {
-  border-radius: 32px;
+.dashboardStat span,
+.confidenceCard span,
+.metricCard span,
+.statusRow span {
+  display: inline-flex;
+  width: fit-content;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+}
+
+.dashboardStat span {
+  color: rgba(255, 255, 255, 0.64);
+}
+
+.dashboardStat strong,
+.confidenceCard strong,
+.metricCard strong,
+.statusRow strong,
+.featureStats strong {
+  display: block;
+  margin-top: 12px;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.dashboardStat p {
+  margin-top: 10px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.heroSidebar {
+  display: grid;
+  gap: 18px;
+}
+
+.sidebarCard,
+.sidebarCardDark,
+.panel,
+.workbench {
   padding: 28px;
-  animation: fadeInUp 900ms ease;
+  border-radius: 32px;
 }
 
+.sidebarCard {
+  background: linear-gradient(180deg, rgba(255, 82, 0, 0.06) 0%, #ffffff 52%);
+}
+
+.sidebarCardDark {
+  background: linear-gradient(180deg, #161618 0%, #0f0f10 100%);
+  color: var(--paper);
+  box-shadow: var(--shadow-strong);
+}
+
+.sidebarHeader,
 .sectionHeading {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  margin-bottom: 24px;
 }
 
+.sidebarCard h2,
+.sidebarCardDark h2,
 .sectionHeading h2 {
-  max-width: 13ch;
-  font-size: clamp(2.1rem, 4vw, 3.7rem);
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  max-width: 14ch;
 }
 
-.sectionHeading p {
-  max-width: 68ch;
-}
-
-.workbench {
-  background:
-    linear-gradient(180deg, rgba(255, 82, 0, 0.03) 0%, rgba(255, 255, 255, 1) 38%),
-    var(--paper);
-}
-
-.workbenchGrid,
-.storyGrid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
+.statusList,
+.barList,
+.workflowList,
+.rankedList,
 .storyList {
   display: grid;
   gap: 14px;
 }
 
-.storyCard,
-.featureCard,
-.imageCard {
-  border-radius: 24px;
-  padding: 20px;
+.statusList {
+  margin-top: 26px;
 }
 
-.storyCard h3,
+.statusRow {
+  padding: 18px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.statusRow:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.statusRow span {
+  color: rgba(255, 255, 255, 0.56);
+}
+
+.statusRow strong {
+  font-size: 1.72rem;
+}
+
+.statusRow p {
+  color: rgba(255, 255, 255, 0.72);
+  margin-top: 8px;
+}
+
+.barMeta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+
+.barMeta strong,
+.workflowCard h3,
+.rankedCard h3,
 .featureCard h3,
+.storyCard h3,
 .panelHeader h3 {
-  font-size: 1.32rem;
-  font-weight: 800;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.barMeta span {
+  color: var(--smoke);
+  font-size: 0.9rem;
+}
+
+.barTrack {
+  height: 11px;
+  border-radius: 999px;
+  background: rgba(15, 15, 16, 0.08);
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ff8c57 0%, var(--swiggy-orange) 100%);
+}
+
+.dashboardGrid {
+  grid-template-columns: minmax(0, 1.18fr) minmax(320px, 0.82fr);
+  animation: fadeInUp 680ms ease;
+}
+
+.sectionHeading {
+  margin-bottom: 24px;
+}
+
+.sectionHeading p {
+  max-width: 64ch;
+}
+
+.confidenceGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.confidenceCard {
+  min-height: 190px;
+  padding: 22px;
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(255, 82, 0, 0.03) 0%, rgba(255, 255, 255, 1) 70%),
+    var(--paper);
+}
+
+.confidenceCard span,
+.metricCard span {
+  color: var(--smoke);
+}
+
+.confidenceCard p {
+  margin-top: 10px;
+}
+
+.workflowList {
+  grid-template-columns: 1fr;
+}
+
+.workflowCard {
+  padding: 22px 22px 22px 78px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 82, 0, 0.04) 0%, rgba(255, 255, 255, 1) 72%);
+}
+
+.workflowCard span,
+.rankedIndex {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  letter-spacing: 0.1em;
+}
+
+.workflowCard p {
+  margin-top: 8px;
+}
+
+.workbench {
+  background:
+    radial-gradient(circle at top left, rgba(255, 82, 0, 0.08), transparent 16%),
+    linear-gradient(180deg, rgba(255, 82, 0, 0.02) 0%, rgba(255, 255, 255, 1) 20%),
+    var(--paper);
+  animation: fadeInUp 820ms ease;
+}
+
+.workbenchGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 18px;
+}
+
+.panelHeader,
+.formActions {
+  justify-content: space-between;
 }
 
 .formGrid {
@@ -407,23 +505,25 @@
 .fieldWide {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 8px;
 }
 
 .fieldWide {
   grid-column: 1 / -1;
 }
 
-.field span {
-  font-size: 0.92rem;
+.field span,
+.fieldWide span {
+  font-size: 0.9rem;
   font-weight: 700;
 }
 
 .field input,
 .fieldWide textarea {
-  border: 1px solid var(--line);
-  background: var(--paper-soft);
+  width: 100%;
+  border: 1px solid rgba(15, 15, 16, 0.1);
   border-radius: 18px;
+  background: var(--paper-soft);
   padding: 15px 16px;
   outline: none;
   transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
@@ -431,13 +531,13 @@
 
 .field input:focus,
 .fieldWide textarea:focus {
-  border-color: rgba(255, 82, 0, 0.44);
-  box-shadow: 0 0 0 4px rgba(255, 82, 0, 0.08);
+  border-color: rgba(255, 82, 0, 0.42);
   background: var(--paper);
+  box-shadow: 0 0 0 4px rgba(255, 82, 0, 0.08);
 }
 
 .fieldWide textarea {
-  min-height: 108px;
+  min-height: 110px;
   resize: vertical;
 }
 
@@ -446,19 +546,18 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 24px;
-  border-radius: 22px;
+  padding: 28px;
+  border-radius: 24px;
   border: 1px dashed rgba(255, 82, 0, 0.34);
   background:
-    linear-gradient(135deg, rgba(255, 82, 0, 0.07), rgba(255, 255, 255, 1) 58%),
+    linear-gradient(145deg, rgba(255, 82, 0, 0.08) 0%, rgba(255, 255, 255, 1) 55%),
     var(--paper);
-  margin-bottom: 16px;
-  overflow: hidden;
+  margin-bottom: 18px;
 }
 
 .uploadBox strong {
-  font-size: 1rem;
-  font-weight: 800;
+  font-size: 1.02rem;
+  font-weight: 700;
 }
 
 .uploadBox input {
@@ -471,8 +570,8 @@
 .tableWrap {
   overflow-x: auto;
   border-radius: 24px;
-  border: 1px solid var(--line);
-  background: var(--paper);
+  border: 1px solid rgba(15, 15, 16, 0.08);
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .table {
@@ -490,23 +589,44 @@
 }
 
 .table th {
-  background: #fcfcfc;
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  background: #faf7f5;
   color: var(--smoke);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
 }
 
+.table tbody tr:hover {
+  background: rgba(255, 82, 0, 0.03);
+}
+
+.batchHint,
 .subText {
-  display: block;
-  font-size: 12px;
+  font-size: 0.84rem;
 }
 
 .resultsBlock {
   display: flex;
   flex-direction: column;
   gap: 18px;
-  margin-top: 28px;
+  margin-top: 26px;
+}
+
+.metricRow {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.metricCard {
+  min-height: 180px;
+  padding: 22px;
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(255, 82, 0, 0.05) 0%, rgba(255, 255, 255, 1) 68%),
+    var(--paper);
+}
+
+.metricCard p {
+  margin-top: 10px;
 }
 
 .badge {
@@ -514,8 +634,8 @@
   align-items: center;
   border-radius: 999px;
   padding: 7px 11px;
-  font-size: 12px;
-  font-weight: 800;
+  font-size: 0.76rem;
+  font-weight: 700;
 }
 
 .badgeHigh {
@@ -533,29 +653,53 @@
   color: var(--ink-soft);
 }
 
+.errorText {
+  margin-top: 12px;
+  color: #cf3c00;
+  font-weight: 700;
+}
+
+.bottomGrid {
+  grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+  animation: fadeInUp 940ms ease;
+}
+
+.rankedCard {
+  padding: 22px 22px 22px 80px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(15, 15, 16, 0.02) 0%, rgba(255, 255, 255, 1) 100%);
+}
+
+.rankedCard p {
+  margin-top: 8px;
+}
+
+.featureGridCompact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .featureGrid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.featureCard {
-  position: relative;
-  overflow: hidden;
-}
-
-.featureCard::after {
-  content: "";
-  position: absolute;
-  right: -18px;
-  top: -18px;
-  width: 84px;
-  height: 84px;
-  border-radius: 22px;
-  background: rgba(255, 82, 0, 0.08);
-  transform: rotate(18deg);
+.featureCard,
+.storyCard,
+.imageCard {
+  padding: 22px;
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(255, 82, 0, 0.04) 0%, rgba(255, 255, 255, 1) 78%),
+    var(--paper);
 }
 
 .featureTag {
+  background: rgba(255, 82, 0, 0.1);
   color: var(--swiggy-orange-strong);
+}
+
+.featureCard p,
+.storyCard p {
+  margin-top: 10px;
 }
 
 .featureStats {
@@ -565,6 +709,11 @@
   margin-top: 16px;
 }
 
+.featureStats strong {
+  font-size: 1.7rem;
+}
+
+.storyGrid,
 .imageGrid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -573,13 +722,7 @@
   width: 100%;
   height: auto;
   border-radius: 18px;
-  border: 1px solid var(--line);
-}
-
-.errorText {
-  margin-top: 12px;
-  color: #d43900;
-  font-weight: 700;
+  border: 1px solid rgba(15, 15, 16, 0.08);
 }
 
 @keyframes fadeInUp {
@@ -607,51 +750,79 @@
 
   .secondaryButton:hover,
   .inlineButton:hover {
-    border-color: rgba(255, 82, 0, 0.3);
+    border-color: rgba(255, 82, 0, 0.28);
     color: var(--swiggy-orange-strong);
     box-shadow: 0 12px 24px rgba(255, 82, 0, 0.08);
   }
 }
 
-@media (max-width: 1100px) {
-  .hero,
-  .metricRow,
-  .signalStrip,
+@media (max-width: 1180px) {
+  .commandDeck,
+  .dashboardGrid,
+  .bottomGrid,
   .workbenchGrid,
-  .storyGrid,
+  .metricRow,
+  .featureGridCompact,
   .featureGrid,
+  .confidenceGrid,
+  .storyGrid,
   .imageGrid {
     grid-template-columns: 1fr;
   }
 
-  .heroMain h1,
-  .sectionHeading h2 {
+  .heroStatsRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .heroPanel h1,
+  .sectionHeading h2,
+  .sidebarCard h2,
+  .sidebarCardDark h2 {
     max-width: none;
   }
 }
 
 @media (max-width: 760px) {
   .page {
-    width: min(100% - 20px, 1380px);
+    width: min(100% - 20px, 1440px);
     padding-top: 18px;
   }
 
   .topbar,
   .brandLockup,
-  .topbarMeta {
-    flex-direction: column;
+  .topbarMeta,
+  .panelHeader,
+  .formActions {
     align-items: flex-start;
+    flex-direction: column;
   }
 
-  .heroMain,
-  .workbench,
-  .panel {
+  .heroPanel,
+  .sidebarCard,
+  .sidebarCardDark,
+  .panel,
+  .workbench {
     padding: 22px;
     border-radius: 26px;
   }
 
-  .heroRailGrid,
+  .heroPanel h1 {
+    font-size: clamp(2.6rem, 15vw, 4.6rem);
+  }
+
+  .heroStatsRow,
   .formGrid {
     grid-template-columns: 1fr;
+  }
+
+  .workflowCard,
+  .rankedCard {
+    padding-left: 22px;
+    padding-top: 78px;
+  }
+
+  .workflowCard span,
+  .rankedIndex {
+    left: 22px;
   }
 }
