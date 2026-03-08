@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# RX Restaurant Calorie Portal
 
-## Getting Started
+This is a restaurant-facing V1 portal built from the modeling artifacts in the parent `Rx Nutritional Calculator` workspace.
 
-First, run the development server:
+The product goal is straightforward:
+- let restaurant partners upload a menu,
+- estimate calories and protein per item using the current modeled Swiggy catalog,
+- show confidence and support so ops teams know what can ship now and what still needs refinement.
+
+## What this app uses
+
+- `final_prediction_v4.csv`: current calorie and protein predictions across the modeled Swiggy catalog.
+- `hp_test_data.csv`: item metadata such as cuisine, classifier, and segment.
+- `hp_train_data.csv`: training-side context used for rollout framing and summary metrics.
+- `High Protein Estimator (version 1)/embedding_train data.csv`: reference-set context from the earlier FAISS prototype.
+- `Interface Screen Grabs/*.png`: legacy prototype screenshots used in the product story section.
+
+The app does not call OpenAI in V1. It uses derived JSON artifacts generated from the existing CSV exports so the portal is deployable and demo-friendly.
+
+## Product scope
+
+- Landing page with rollout framing for internal teams and restaurant partners.
+- Menu estimation workbench with:
+  - manual item entry,
+  - CSV upload,
+  - confidence-aware calorie estimation,
+  - support counts and rationale.
+- Catalog intelligence section showing high-support dish anchors.
+- Prototype lineage section showing the earlier Streamlit flow.
+
+## Local development
 
 ```bash
+npm install
+npm run build:data
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Data build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build:data
+```
 
-## Learn More
+This generates:
+- `app-data/catalog.json`
+- `app-data/overview.json`
+- `app-data/featured.json`
+- `public/sample-menu.csv`
 
-To learn more about Next.js, take a look at the following resources:
+## Production build
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run build
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Notes on the matching engine
 
-## Deploy on Vercel
+- Exact match is attempted first on normalized dish names.
+- If there is no exact hit, the app uses a lightweight fuzzy analogue search against the derived catalog.
+- Match confidence is not a nutrition truth score. It is a rollout score based on:
+  - name-match strength,
+  - support volume in the modeled catalog,
+  - presence of direct regex evidence,
+  - availability of training/reference context.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Why this V1 exists
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This portal is intended to help teams move from experimentation to workflow:
+- restaurants can see estimated calories today,
+- internal teams can isolate weak catalog coverage,
+- the next refinement loop can be directed by real menu gaps instead of abstract model metrics.
