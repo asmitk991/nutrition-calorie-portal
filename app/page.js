@@ -17,98 +17,123 @@ export default async function Home() {
 
   return (
     <main className={styles.page}>
+      <header className={styles.topbar}>
+        <div className={styles.brandLockup}>
+          <span className={styles.brandMark}>RX</span>
+          <div>
+            <strong>Restaurant Calorie Portal</strong>
+            <span>Swiggy-aligned estimation workspace</span>
+          </div>
+        </div>
+        <div className={styles.topbarMeta}>
+          <span>V1</span>
+          <span>{overview.modeledItems.toLocaleString()} modeled rows</span>
+        </div>
+      </header>
+
       <section className={styles.hero}>
-        <div className={styles.heroCopy}>
-          <span className={styles.kicker}>Version 1 for restaurant partners</span>
-          <h1>Turn the existing Swiggy calorie work into a portal your team can review today.</h1>
+        <div className={styles.heroMain}>
+          <span className={styles.kicker}>For restaurant onboarding and calorie rollout</span>
+          <h1>Estimate calories fast, show confidence clearly, and push weak dishes into review.</h1>
           <p className={styles.heroText}>
-            This V1 does not pretend to be a final nutrition engine. It operationalizes the current modeled catalog so
-            restaurants can upload a menu, see estimated calories per item, and understand where the rollout is already
-            strong versus where human refinement is still needed.
+            This product turns the existing Swiggy calorie work into something your team can actually demo. Restaurants can
+            upload a menu, get dish-level calorie estimates, and understand which items are already well supported by the
+            current catalog and which ones still need analyst calibration.
           </p>
 
           <div className={styles.heroActions}>
             <a className={styles.primaryButton} href="#portal">
-              Open estimator
+              Launch estimator
             </a>
             <a className={styles.secondaryButton} href="/sample-menu.csv" download>
-              Download sample menu
+              Download sample CSV
             </a>
+          </div>
+
+          <div className={styles.heroFootnote}>
+            <span>Built from your current CSV outputs, training context, and prototype lineage.</span>
           </div>
         </div>
 
-        <div className={styles.heroPanel}>
-          <div className={styles.heroStat}>
-            <span>Modeled catalog rows</span>
-            <strong>{overview.modeledItems.toLocaleString()}</strong>
-          </div>
-          <div className={styles.heroStat}>
-            <span>Normalized dish names</span>
+        <div className={styles.heroRail}>
+          <div className={styles.heroRailCard}>
+            <span>Catalog coverage</span>
             <strong>{overview.uniqueDishNames.toLocaleString()}</strong>
+            <p>normalized dish anchors ready for matching in the V1 portal.</p>
           </div>
-          <div className={styles.heroStat}>
-            <span>Training reference rows</span>
-            <strong>{overview.referenceRows.toLocaleString()}</strong>
+          <div className={styles.heroRailCardDark}>
+            <span>Primary cuisine block</span>
+            <strong>{overview.topCuisines[0]?.name || "North Indian"}</strong>
+            <p>{overview.topCuisines[0]?.count?.toLocaleString() || 0} items in the current modeled demand set.</p>
           </div>
-          <div className={styles.heroStat}>
-            <span>Description coverage</span>
-            <strong>{formatPercent(overview.descriptionCoverage)}</strong>
+          <div className={styles.heroRailGrid}>
+            <div className={styles.heroMiniStat}>
+              <span>Description coverage</span>
+              <strong>{formatPercent(overview.descriptionCoverage)}</strong>
+            </div>
+            <div className={styles.heroMiniStat}>
+              <span>Regex calorie evidence</span>
+              <strong>{formatPercent(overview.regexEnergyCoverage)}</strong>
+            </div>
+            <div className={styles.heroMiniStat}>
+              <span>Training median</span>
+              <strong>{overview.trainingSignals.avgCalories} kcal</strong>
+            </div>
+            <div className={styles.heroMiniStat}>
+              <span>Reference rows</span>
+              <strong>{overview.referenceRows.toLocaleString()}</strong>
+            </div>
           </div>
         </div>
       </section>
 
-      <div className={styles.metricRow}>
-        <div className={styles.metricCard}>
-          <span>Swiggy menu coverage</span>
-          <strong>{overview.testItems.toLocaleString()} rows</strong>
-          <p>Existing test-side items already scored with predicted calories and protein.</p>
-        </div>
-        <div className={styles.metricCard}>
-          <span>Direct evidence layer</span>
-          <strong>{formatPercent(overview.regexEnergyCoverage)}</strong>
-          <p>Rows where explicit calorie text was directly extracted in the current export.</p>
-        </div>
-        <div className={styles.metricCard}>
-          <span>Training median</span>
-          <strong>{overview.trainingSignals.avgCalories} kcal</strong>
-          <p>Median calorie label in the current high-protein training set.</p>
-        </div>
-        <div className={styles.metricCard}>
-          <span>Primary cuisine block</span>
-          <strong>{overview.topCuisines[0]?.name || "North Indian"}</strong>
-          <p>The largest cuisine segment in the current modeled demand set.</p>
-        </div>
-      </div>
+      <section className={styles.signalStrip}>
+        <article className={styles.signalCard}>
+          <span>Restaurant upload flow</span>
+          <strong>Manual entry + CSV intake</strong>
+          <p>Immediate batch estimation for ops demos and onboarding calls.</p>
+        </article>
+        <article className={styles.signalCard}>
+          <span>Decision support</span>
+          <strong>Calories + confidence + support</strong>
+          <p>Teams can separate strong catalog matches from dishes that still need human review.</p>
+        </article>
+        <article className={styles.signalCard}>
+          <span>Rollout intent</span>
+          <strong>Bridge to user-facing Swiggy calories</strong>
+          <p>This V1 is designed to operationalize the current model outputs, not hide uncertainty.</p>
+        </article>
+      </section>
 
       <PortalWorkbench />
 
       <section className={styles.storyGrid}>
         <div className={styles.panel}>
           <div className={styles.sectionHeading}>
-            <span className={styles.kicker}>What this V1 uses</span>
-            <h2>The portal is built on top of the modeling work already in this workspace.</h2>
+            <span className={styles.kicker}>Data backbone</span>
+            <h2>The portal is using the work already done, not replacing it.</h2>
           </div>
 
           <div className={styles.storyList}>
             <article className={styles.storyCard}>
-              <h3>Modeled prediction layer</h3>
+              <h3>Prediction surface</h3>
               <p>
-                `final_prediction_v4.csv` provides the immediate calorie and protein outputs for the Swiggy catalog. This
-                is the first estimation surface powering the portal.
+                `final_prediction_v4.csv` is the live estimation layer in this V1. That keeps the product demo grounded in
+                the calorie outputs you already have.
               </p>
             </article>
             <article className={styles.storyCard}>
-              <h3>Demand-side metadata</h3>
+              <h3>Swiggy metadata context</h3>
               <p>
-                `hp_test_data.csv` adds cuisine, classifier, and segment context so each match feels like a product
-                workflow instead of a bare score lookup.
+                `hp_test_data.csv` adds cuisine and catalog context so every restaurant match looks like a product decision,
+                not a spreadsheet row.
               </p>
             </article>
             <article className={styles.storyCard}>
-              <h3>Training and reference context</h3>
+              <h3>Training context</h3>
               <p>
-                `hp_train_data.csv` and the FAISS reference dataset are used to explain coverage, maturity, and what the
-                next refinement loop should focus on.
+                `hp_train_data.csv` and the FAISS reference set frame where your current data is strong and what the next
+                refinement loop should target.
               </p>
             </article>
           </div>
@@ -116,22 +141,22 @@ export default async function Home() {
 
         <div className={styles.panel}>
           <div className={styles.sectionHeading}>
-            <span className={styles.kicker}>Rollout logic</span>
-            <h2>How restaurants would actually use this.</h2>
+            <span className={styles.kicker}>Operational workflow</span>
+            <h2>How a restaurant ops team would use this product.</h2>
           </div>
 
           <div className={styles.storyList}>
             <article className={styles.storyCard}>
-              <h3>Step 1</h3>
-              <p>Upload a menu or enter dishes manually. The portal matches each line against the modeled Swiggy corpus.</p>
+              <h3>1. Upload menu</h3>
+              <p>Paste dishes manually or drop in a CSV with names, descriptions, cuisines, and prices.</p>
             </article>
             <article className={styles.storyCard}>
-              <h3>Step 2</h3>
-              <p>Review calories, protein, confidence, and support counts before sending the items further downstream.</p>
+              <h3>2. Review confidence</h3>
+              <p>See calorie estimates with support counts and rationale before anything moves closer to production.</p>
             </article>
             <article className={styles.storyCard}>
-              <h3>Step 3</h3>
-              <p>Send low-confidence or no-match rows into analyst review, nutrition ops, or restaurant clarification.</p>
+              <h3>3. Escalate edge cases</h3>
+              <p>Low-confidence rows become the queue for analyst review, restaurant clarification, or model refinement.</p>
             </article>
           </div>
         </div>
@@ -139,8 +164,8 @@ export default async function Home() {
 
       <section className={styles.panel}>
         <div className={styles.sectionHeading}>
-          <span className={styles.kicker}>Catalog intelligence</span>
-          <h2>High-support dish anchors from the current modeled catalog.</h2>
+          <span className={styles.kicker}>High-support anchors</span>
+          <h2>Modeled dishes that already give the portal real weight.</h2>
         </div>
 
         <div className={styles.featureGrid}>
@@ -162,17 +187,17 @@ export default async function Home() {
       <section className={styles.panel}>
         <div className={styles.sectionHeading}>
           <span className={styles.kicker}>Prototype lineage</span>
-          <h2>This portal inherits the original Streamlit workflow but reframes it for product review.</h2>
+          <h2>The current portal stands on top of the earlier estimator workflow.</h2>
         </div>
 
         <div className={styles.imageGrid}>
           <figure className={styles.imageCard}>
             <Image src="/legacy-upload.png" alt="Legacy upload screen from the original estimator." width={1867} height={749} />
-            <figcaption>The earlier prototype already proved the CSV upload and batch estimation flow.</figcaption>
+            <figcaption>The original prototype already established the menu-upload behavior.</figcaption>
           </figure>
           <figure className={styles.imageCard}>
             <Image src="/legacy-results.png" alt="Legacy results preview from the original estimator." width={1849} height={305} />
-            <figcaption>This V1 keeps that operational intent but upgrades the framing for restaurant rollout.</figcaption>
+            <figcaption>This redesign turns that same workflow into a stronger team-facing product surface.</figcaption>
           </figure>
         </div>
       </section>

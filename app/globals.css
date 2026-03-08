@@ -1,13 +1,18 @@
+@import url("https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap");
+
 :root {
-  --background: #f4ede0;
-  --foreground: #1e1b18;
-  --muted: #756a5c;
-  --panel: rgba(255, 248, 239, 0.86);
-  --line: rgba(63, 47, 34, 0.12);
-  --accent: #c75d2c;
-  --accent-strong: #8f3414;
-  --teal: #0d6f68;
-  --shadow: 0 24px 80px rgba(59, 39, 20, 0.13);
+  --swiggy-orange: #ff5200;
+  --swiggy-orange-strong: #e24700;
+  --ink: #0f0f10;
+  --ink-soft: #202124;
+  --smoke: #6f7278;
+  --paper: #ffffff;
+  --paper-soft: #f7f7f8;
+  --line: rgba(15, 15, 16, 0.08);
+  --line-strong: rgba(15, 15, 16, 0.16);
+  --success: #0f8d60;
+  --shadow-soft: 0 22px 60px rgba(15, 15, 16, 0.08);
+  --shadow-strong: 0 28px 80px rgba(15, 15, 16, 0.14);
 }
 
 * {
@@ -22,12 +27,12 @@ html {
 
 body {
   min-height: 100vh;
-  color: var(--foreground);
+  color: var(--ink);
   background:
-    radial-gradient(circle at top right, rgba(225, 110, 55, 0.16), transparent 28%),
-    radial-gradient(circle at left 30%, rgba(26, 130, 118, 0.16), transparent 24%),
-    linear-gradient(180deg, #f7f0e4 0%, #f2e7d6 42%, #efe3d0 100%);
-  font-family: var(--font-sans), sans-serif;
+    radial-gradient(circle at top right, rgba(255, 82, 0, 0.12), transparent 22%),
+    radial-gradient(circle at left 20%, rgba(255, 82, 0, 0.06), transparent 18%),
+    linear-gradient(180deg, #ffffff 0%, #f8f8f8 100%);
+  font-family: "Satoshi", "Avenir Next", "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
