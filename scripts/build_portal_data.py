@@ -34,6 +34,43 @@ def mode_or_empty(series):
     return cleaned.value_counts().index[0]
 
 
+def positive_numeric(series):
+    values = pd.to_numeric(series, errors="coerce").dropna()
+    return values[values > 0]
+
+
+def positive_numeric_count(series):
+    return int(positive_numeric(series).shape[0])
+
+
+def positive_numeric_median(series):
+    values = positive_numeric(series)
+    if values.empty:
+        return float("nan")
+    return float(values.median())
+
+
+def positive_numeric_quantile(series, quantile):
+    values = positive_numeric(series)
+    if values.empty:
+        return float("nan")
+    return float(values.quantile(quantile))
+
+
+def positive_numeric_min(series):
+    values = positive_numeric(series)
+    if values.empty:
+        return float("nan")
+    return float(values.min())
+
+
+def positive_numeric_max(series):
+    values = positive_numeric(series)
+    if values.empty:
+        return float("nan")
+    return float(values.max())
+
+
 def build_catalog():
     predictions = pd.read_csv(
         SOURCE_ROOT / "final_prediction_v4.csv",
@@ -72,6 +109,7 @@ def build_catalog():
             "RX_CUISINE",
             "DISH_TYPE",
             "DISH_FAMILY",
+            "ITEM_PRICE",
             "PROTEIN_VALUE_IN_GRAM",
             "CALORIE_VALUE_IN_KCAL",
         ],
@@ -115,6 +153,12 @@ def build_catalog():
             train_cuisine=("RX_CUISINE", mode_or_empty),
             train_dish_type=("DISH_TYPE", mode_or_empty),
             train_dish_family=("DISH_FAMILY", mode_or_empty),
+            train_price_count=("ITEM_PRICE", positive_numeric_count),
+            train_median_price=("ITEM_PRICE", positive_numeric_median),
+            train_price_q1=("ITEM_PRICE", lambda x: positive_numeric_quantile(x, 0.25)),
+            train_price_q3=("ITEM_PRICE", lambda x: positive_numeric_quantile(x, 0.75)),
+            train_price_min=("ITEM_PRICE", positive_numeric_min),
+            train_price_max=("ITEM_PRICE", positive_numeric_max),
             train_avg_protein=("PROTEIN_VALUE_IN_GRAM", "median"),
             train_avg_calories=("CALORIE_VALUE_IN_KCAL", "median"),
         )
@@ -149,6 +193,26 @@ def build_catalog():
 
     catalog = catalog[catalog["normalized_name"] != ""].copy()
     catalog["trusted_share"] = catalog["trusted_share"].fillna(0.0)
+    price_iqr = (catalog["train_price_q3"] - catalog["train_price_q1"]).clip(lower=0)
+    catalog["train_price_iqr"] = price_iqr.where(catalog["train_median_price"].notna())
+    price_band_half_width = pd.concat(
+        [
+            price_iqr.mul(1.5),
+            catalog["train_median_price"].mul(0.35),
+            pd.Series(60.0, index=catalog.index),
+        ],
+        axis=1,
+    ).max(axis=1, skipna=True)
+    price_band_half_width = price_band_half_width.where(catalog["train_median_price"].notna())
+    catalog["train_price_band_low"] = (catalog["train_median_price"] - price_band_half_width).clip(lower=0).where(
+        catalog["train_median_price"].notna()
+    )
+    catalog["train_price_band_high"] = (catalog["train_median_price"] + price_band_half_width).where(
+        catalog["train_median_price"].notna()
+    )
+    catalog["train_price_spread_ratio"] = (
+        catalog["train_price_iqr"] / catalog["train_median_price"]
+    ).where((catalog["train_median_price"].notna()) & (catalog["train_median_price"] > 0))
     catalog["data_confidence"] = 32
     catalog.loc[catalog["support_count"] >= 250, "data_confidence"] += 28
     catalog.loc[catalog["support_count"].between(100, 249), "data_confidence"] += 22
@@ -231,10 +295,20 @@ def build_sample_menu(catalog):
             continue
         sample_items.append(
             {
+                "RID": f"SAMPLE-{len(sample_items) + 1:03d}",
                 "ITEM_NAME": item["display_name"],
+                "ITEM_PRICE": "" if pd.isna(item["train_median_price"]) else int(round(item["train_median_price"])),
                 "ITEM_DESCRIPTION": item["description"] or "",
                 "RX_CUISINE": item["top_cuisine"] or item["reference_cuisine"] or "",
-                "ITEM_PRICE": "",
+                "ITEM_GRAMMAGE": "",
+                "MAIN_INGREDIENT_1": "",
+                "MAIN_INGREDIENT_2": "",
+                "MAIN_INGREDIENT_3": "",
+                "MAIN_INGREDIENT_1_GRAMMAGE": "",
+                "MAIN_INGREDIENT_2_GRAMMAGE": "",
+                "MAIN_INGREDIENT_3_GRAMMAGE": "",
+                "COMPULSORY_COMPONENTS": "",
+                "OPTIONAL_COMPONENTS": "",
             }
         )
         seen.add(item["display_name"])
