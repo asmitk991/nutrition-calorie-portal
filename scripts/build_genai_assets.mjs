@@ -1,11 +1,31 @@
 import fs from "node:fs/promises";
+import { readFileSync } from "node:fs";
 import path from "node:path";
 
 import OpenAI from "openai";
 import Papa from "papaparse";
 
 
+// Load .env.local so the script works outside of Next.js
 const APP_ROOT = path.resolve(process.cwd());
+for (const envFile of [".env.local", ".env"]) {
+  try {
+    const raw = readFileSync(path.join(APP_ROOT, envFile), "utf-8");
+    for (const line of raw.split("\n")) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+      const eqIndex = trimmed.indexOf("=");
+      if (eqIndex < 1) continue;
+      const key = trimmed.slice(0, eqIndex).trim();
+      const value = trimmed.slice(eqIndex + 1).trim();
+      if (!process.env[key]) {
+        process.env[key] = value;
+      }
+    }
+  } catch {
+    // file not found, skip
+  }
+}
 const SOURCE_ROOT = path.resolve(APP_ROOT, "..");
 const APP_DATA_DIR = path.join(APP_ROOT, "app-data");
 const LEGACY_DIR = path.join(SOURCE_ROOT, "High Protein Estimator (version 1)");
@@ -16,6 +36,7 @@ const EMBEDDINGS_PATH = path.join(APP_DATA_DIR, "genai-reference-embeddings.f32"
 const MANIFEST_PATH = path.join(APP_DATA_DIR, "genai-reference-manifest.json");
 
 const EMBEDDING_MODEL = process.env.OPENAI_EMBEDDING_MODEL || "text-embedding-3-small";
+const EMBEDDING_DIMENSIONS = Number(process.env.OPENAI_EMBEDDING_DIMENSIONS) || 512;
 const BATCH_SIZE = 100;
 
 
@@ -155,6 +176,7 @@ async function main() {
     const response = await client.embeddings.create({
       model: EMBEDDING_MODEL,
       input: batch.map((record) => record.embedding_text),
+      dimensions: EMBEDDING_DIMENSIONS,
     });
 
     for (const item of response.data) {
