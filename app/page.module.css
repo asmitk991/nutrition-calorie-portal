@@ -539,6 +539,25 @@
   gap: 16px;
 }
 
+.ingredientComposer,
+.ingredientList {
+  display: grid;
+  gap: 14px;
+}
+
+.ingredientCard {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.7fr) auto;
+  gap: 12px;
+  align-items: end;
+  padding: 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(15, 15, 16, 0.08);
+  background:
+    linear-gradient(180deg, rgba(255, 82, 0, 0.03) 0%, rgba(255, 255, 255, 1) 100%),
+    var(--paper);
+}
+
 .formSection {
   padding: 20px;
   border-radius: 24px;
@@ -607,7 +626,10 @@
 }
 
 .field input,
-.fieldWide textarea {
+.field textarea,
+.field select,
+.fieldWide textarea,
+.fieldSelect {
   width: 100%;
   border: 1px solid rgba(15, 15, 16, 0.1);
   border-radius: 18px;
@@ -618,12 +640,16 @@
 }
 
 .field input:focus,
-.fieldWide textarea:focus {
+.field textarea:focus,
+.field select:focus,
+.fieldWide textarea:focus,
+.fieldSelect:focus {
   border-color: rgba(255, 82, 0, 0.42);
   background: var(--paper);
   box-shadow: 0 0 0 4px rgba(255, 82, 0, 0.08);
 }
 
+.field textarea,
 .fieldWide textarea {
   min-height: 110px;
   resize: vertical;
@@ -1078,6 +1104,10 @@
     grid-template-columns: 1fr;
   }
 
+  .ingredientCard {
+    grid-template-columns: 1fr;
+  }
+
   .workflowCard,
   .rankedCard {
     padding-left: 22px;
@@ -1092,5 +1122,168 @@
   .fieldLabelRow {
     align-items: flex-start;
     flex-direction: column;
+  }
+}
+
+/* ============================================================
+   Minimal landing — calculator-first redesign (Apr 2026).
+   Keeps the existing classes above intact so /bulk and /docs
+   can still reuse PortalWorkbench and the rich panels.
+   ============================================================ */
+
+.minimalPage {
+  min-height: 100vh;
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 28px 24px 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.minimalTopbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.minimalNav {
+  display: flex;
+  gap: 18px;
+  font-size: 14px;
+  color: var(--smoke);
+}
+
+.minimalNav a {
+  position: relative;
+  padding-bottom: 2px;
+}
+
+.minimalNav a:hover {
+  color: var(--ink);
+  border-bottom: 1px solid var(--swiggy-orange);
+}
+
+.minimalHero {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 4px auto 2px;
+  max-width: 720px;
+}
+
+.minimalHero h1 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(30px, 4vw, 46px);
+  line-height: 1.05;
+  letter-spacing: 0;
+}
+
+.minimalHero p {
+  max-width: 560px;
+  margin: 0 auto;
+  color: var(--smoke);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.productBand {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 22px;
+  align-items: center;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 24px 0;
+}
+
+.productBand h2 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  line-height: 1.18;
+  font-weight: 600;
+  margin: 6px 0 8px;
+  letter-spacing: 0;
+}
+
+.productBand p {
+  color: var(--smoke);
+  line-height: 1.6;
+  max-width: 560px;
+}
+
+.productEyebrow {
+  display: inline-flex;
+  color: var(--swiggy-orange-strong);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.productActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  max-width: 340px;
+}
+
+.productButton,
+.productButtonPrimary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  border-radius: 999px;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 700;
+  border: 1px solid var(--line-strong);
+}
+
+.productButton {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.productButtonPrimary {
+  background: var(--swiggy-orange);
+  border-color: var(--swiggy-orange);
+  color: var(--paper);
+}
+
+.minimalFooter {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--smoke);
+  border-top: 1px solid var(--line);
+  padding-top: 20px;
+}
+
+.minimalFooter a {
+  color: var(--swiggy-orange);
+  font-weight: 600;
+}
+
+.minimalFooter a:hover {
+  color: var(--swiggy-orange-strong);
+}
+
+@media (max-width: 760px) {
+  .productBand {
+    grid-template-columns: 1fr;
+  }
+
+  .productActions {
+    justify-content: flex-start;
+    max-width: none;
   }
 }

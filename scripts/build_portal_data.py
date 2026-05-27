@@ -1,4 +1,6 @@
 import json
+import csv
+from collections import Counter, defaultdict
 from pathlib import Path
 
 import pandas as pd
@@ -8,6 +10,7 @@ APP_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_ROOT = APP_ROOT.parent
 DATA_DIR = APP_ROOT / "app-data"
 PUBLIC_DIR = APP_ROOT / "public"
+LEGACY_DIR = SOURCE_ROOT / "High Protein Estimator (version 1)"
 
 
 def normalize_text(value):
@@ -277,6 +280,87 @@ def build_catalog():
     return records, overview, featured
 
 
+def build_active_menu_catalog():
+    aggregates = defaultdict(
+        lambda: {
+            "display_name_counts": Counter(),
+            "parent_counts": Counter(),
+            "dish_type_counts": Counter(),
+            "dish_family_counts": Counter(),
+            "count": 0,
+            "price_sum": 0.0,
+            "price_count": 0,
+            "min_price": None,
+            "max_price": None,
+        }
+    )
+
+    with (SOURCE_ROOT / "active_health_items_20Apr.csv").open("r", encoding="utf-8", errors="ignore", newline="") as handle:
+        reader = csv.DictReader(handle)
+        for row in reader:
+            item_name = (row.get("ITEM_NAME") or "").strip()
+            normalized_name = normalize_text(item_name)
+            if not normalized_name:
+                continue
+
+            bucket = aggregates[normalized_name]
+            bucket["count"] += 1
+
+            if item_name:
+                bucket["display_name_counts"][item_name] += 1
+
+            parent_name = (row.get("PARENT_NAME") or "").strip()
+            if parent_name:
+                bucket["parent_counts"][parent_name] += 1
+
+            dish_type = (row.get("DISH_TYPE") or "").strip()
+            if dish_type:
+                bucket["dish_type_counts"][dish_type] += 1
+
+            dish_family = (row.get("DISH_FAMILY") or "").strip()
+            if dish_family:
+                bucket["dish_family_counts"][dish_family] += 1
+
+            price = pd.to_numeric(row.get("PRICE"), errors="coerce")
+            if pd.notna(price) and price > 0:
+                price_value = float(price)
+                bucket["price_sum"] += price_value
+                bucket["price_count"] += 1
+                bucket["min_price"] = price_value if bucket["min_price"] is None else min(bucket["min_price"], price_value)
+                bucket["max_price"] = price_value if bucket["max_price"] is None else max(bucket["max_price"], price_value)
+
+    records = []
+    for normalized_name, bucket in aggregates.items():
+        median_price = None
+        if bucket["price_count"]:
+            median_price = round(bucket["price_sum"] / bucket["price_count"], 1)
+
+        record = {
+            "normalized_name": normalized_name,
+            "display_name": bucket["display_name_counts"].most_common(1)[0][0] if bucket["display_name_counts"] else None,
+            "active_support_count": bucket["count"],
+            "top_parent_name": bucket["parent_counts"].most_common(1)[0][0] if bucket["parent_counts"] else None,
+            "top_dish_type": bucket["dish_type_counts"].most_common(1)[0][0] if bucket["dish_type_counts"] else None,
+            "top_dish_family": bucket["dish_family_counts"].most_common(1)[0][0] if bucket["dish_family_counts"] else None,
+            "median_price": median_price,
+            "min_price": round(bucket["min_price"], 1) if bucket["min_price"] is not None else None,
+            "max_price": round(bucket["max_price"], 1) if bucket["max_price"] is not None else None,
+        }
+        record["search_blob"] = normalize_text(
+            " ".join(
+                [
+                    record.get("display_name") or "",
+                    record.get("top_parent_name") or "",
+                    record.get("top_dish_type") or "",
+                    record.get("top_dish_family") or "",
+                ]
+            )
+        )
+        records.append(record)
+
+    return sorted(records, key=lambda item: (-item["active_support_count"], item["display_name"] or ""))
+
+
 def build_sample_menu(catalog):
     sample_items = []
     seen = set()
@@ -295,18 +379,25 @@ def build_sample_menu(catalog):
             continue
         sample_items.append(
             {
-                "RID": f"SAMPLE-{len(sample_items) + 1:03d}",
+                "RID": f"{len(sample_items) + 1:03d}",
                 "ITEM_NAME": item["display_name"],
                 "ITEM_PRICE": "" if pd.isna(item["train_median_price"]) else int(round(item["train_median_price"])),
                 "ITEM_DESCRIPTION": item["description"] or "",
                 "RX_CUISINE": item["top_cuisine"] or item["reference_cuisine"] or "",
                 "ITEM_GRAMMAGE": "",
                 "MAIN_INGREDIENT_1": "",
-                "MAIN_INGREDIENT_2": "",
-                "MAIN_INGREDIENT_3": "",
                 "MAIN_INGREDIENT_1_GRAMMAGE": "",
+                "MAIN_INGREDIENT_2": "",
                 "MAIN_INGREDIENT_2_GRAMMAGE": "",
+                "MAIN_INGREDIENT_3": "",
                 "MAIN_INGREDIENT_3_GRAMMAGE": "",
+                "MAIN_INGREDIENT_4": "",
+                "MAIN_INGREDIENT_4_GRAMMAGE": "",
+                "MAIN_INGREDIENT_5": "",
+                "MAIN_INGREDIENT_5_GRAMMAGE": "",
+                "MAIN_INGREDIENT_6": "",
+                "MAIN_INGREDIENT_6_GRAMMAGE": "",
+                "INGREDIENTS_LIST": "",
                 "COMPULSORY_COMPONENTS": "",
                 "OPTIONAL_COMPONENTS": "",
             }
@@ -322,11 +413,19 @@ def main():
     PUBLIC_DIR.mkdir(exist_ok=True)
 
     catalog, overview, featured = build_catalog()
+    active_menu_catalog = build_active_menu_catalog()
     sample_menu = build_sample_menu(catalog)
 
     (DATA_DIR / "catalog.json").write_text(json.dumps(catalog, indent=2), encoding="utf-8")
     (DATA_DIR / "overview.json").write_text(json.dumps(overview, indent=2), encoding="utf-8")
     (DATA_DIR / "featured.json").write_text(json.dumps(featured, indent=2), encoding="utf-8")
+    (DATA_DIR / "active-menu-catalog.json").write_text(
+        json.dumps(active_menu_catalog, indent=2), encoding="utf-8"
+    )
+    (DATA_DIR / "icmr-reference.csv").write_text(
+        (LEGACY_DIR / "nutritional_100gm_db.csv").read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
     sample_menu.to_csv(PUBLIC_DIR / "sample-menu.csv", index=False)
 
     print(f"Wrote {len(catalog)} catalog records to {DATA_DIR}")

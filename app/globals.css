@@ -15,6 +15,10 @@
   --shadow-strong: 0 28px 80px rgba(15, 15, 16, 0.14);
   --font-body: "Satoshi", "Avenir Next", "Segoe UI", sans-serif;
   --font-display: "Clash Display", "Satoshi", "Avenir Next", sans-serif;
+
+  /* Bulk page tokens */
+  --bulk-border: 1px solid rgba(15, 23, 42, 0.08);
+  --bulk-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
 }
 
 * {
