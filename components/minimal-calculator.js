@@ -86,7 +86,6 @@ export default function MinimalCalculator({ cuisineOptions = [] }) {
     if (!form.rid.trim()) missingFields.push("RID");
     if (!form.name.trim()) missingFields.push("Item name");
     if (!form.price.trim()) missingFields.push("Item price");
-    if (!form.grammage.trim()) missingFields.push("Item grammage");
 
     if (missingFields.length) {
       setError(`Please add ${missingFields.join(", ")} before estimating.`);
@@ -199,10 +198,10 @@ export default function MinimalCalculator({ cuisineOptions = [] }) {
           />
           <Field
             label="Item grammage"
-            required
+            required={false}
             value={form.grammage}
             placeholder="320"
-            helper="Approximate total plated weight in grams."
+            helper="Approximate total plated weight in grams (optional)."
             inputMode="decimal"
             onChange={(value) => updateField("grammage", value)}
           />

@@ -32,7 +32,7 @@ export async function POST(request) {
     if (errors.length) {
       return NextResponse.json(
         {
-          error: "Each menu item must include numeric RID, ITEM_NAME, ITEM_PRICE, and ITEM_GRAMMAGE before estimation can run.",
+          error: "Each menu item must include numeric RID, ITEM_NAME, and ITEM_PRICE before estimation can run.",
           reasonCode: "validation_error",
           retryable: false,
           details: errors,

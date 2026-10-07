@@ -28,8 +28,8 @@ export default async function Home() {
       <section className={styles.minimalHero}>
         <h1>Add one menu item. Get a clean nutrition estimate.</h1>
         <p>
-          Start with numeric <strong>RID</strong>, item name, price, and grammage. Add ingredients or add-ons only when
-          they help explain the dish.
+          Start with numeric <strong>RID</strong>, item name, and price. Add grammage, ingredients, or add-ons whenever
+          available.
         </p>
       </section>
 

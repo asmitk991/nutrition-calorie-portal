@@ -507,7 +507,7 @@ export default function BulkUploader() {
           onPasteCsv={handlePasteCsv}
           onError={(message) => setToast(message)}
         />
-        <p className={styles.requiredNote}>Required inside the file: RID, ITEM_NAME, ITEM_PRICE, ITEM_GRAMMAGE.</p>
+        <p className={styles.requiredNote}>Required inside the file: RID, ITEM_NAME, ITEM_PRICE.</p>
       </section>
 
       {queue.length ? (
@@ -535,7 +535,7 @@ export default function BulkUploader() {
                 type="button"
                 onClick={runEstimate}
                 disabled={runDisabled}
-                title={needsInputCount > 0 ? "Complete RID, Item name, Price, and Grammage before running." : ""}
+                title={needsInputCount > 0 ? "Complete RID, Item name, and Price before running." : ""}
               >
                 {running ? "Running..." : "Run estimate"}
               </button>
