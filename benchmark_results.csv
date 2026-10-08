@@ -1,0 +1,51 @@
+row_number,rid,item_name,estimation_status,error_code,error_message,actual_protein_g,predicted_protein_g,protein_abs_error,actual_energy_kcal,predicted_energy_kcal,energy_abs_error,confidence_band,protein_confidence_band,energy_confidence_band,similar_items_found,active_menu_hits,icmr_hits,top_similarity_percent
+1,1054009,Chicken Tikka Masala Bowl,ok,,,26,26,0,462,550,88,Medium,High,Medium,3,5,1,81
+2,1240747,Punjabi Chole with Brown Jeera Rice,ok,,,17,31,14,284,310,26,Medium,High,Medium,3,5,0,83
+3,1240747,Punjabi Chole with Brown Jeera Rice,ok,,,17,31,14,284,310,26,Medium,High,Medium,3,5,0,83
+4,1285875,Egg Curry and Rajma Meal,ok,,,17,30,13,280,500,220,Medium,Medium,Medium,3,5,1,80
+5,1285875,Egg Curry and Rajma Meal,ok,,,17,30,13,280,500,220,Medium,Medium,Medium,3,5,1,80
+6,1344139,Punjabi Chole with Brown Jeera Rice,ok,,,17,31,14,284,310,26,Medium,High,Medium,3,5,0,83
+7,1344139,Punjabi Chole with Brown Jeera Rice,ok,,,17,31,14,284,310,26,Medium,High,Medium,3,5,0,83
+8,3368,Tex Mex Burger (Lettuce Wrap),ok,,,24,24,0,200,190,10,Medium,High,Medium,3,5,1,73
+9,1026577,Chicken Steak Burger (Lettuce Wrap),ok,,,24,30,6,200,400,200,Medium,Medium,Medium,3,5,1,73
+10,96510,High Protein Tandoori Chicken 2Pc,ok,,,64.8,65,0.20000000000000284,304,304,0,High,High,High,3,5,1,76
+11,47483,Coastal Fish Curry and Matar Paneer Meal,ok,,,35,30,5,604,600,4,Medium,Medium,Medium,3,5,1,77
+12,47483,Coastal Fish Curry and Matar Paneer Meal,ok,,,35,30,5,604,600,4,Medium,Medium,Medium,3,5,1,77
+13,1053712,Paneer Tikka Masala Bowl,ok,,,17,17,0,541,600,59,Medium,High,Medium,3,5,1,84
+14,1371278,Paneer Tikka (10 pcs),ok,,,24,24,0,346,700,354,Medium,High,Medium,3,5,1,83
+15,1307111,Caribbean Grilled Chicken with Herbed Rice,ok,,,36,36,0,606,700,94,Medium,High,Medium,3,5,1,79
+16,1307111,Caribbean Grilled Chicken with Herbed Rice,ok,,,36,36,0,606,700,94,Medium,High,Medium,3,5,1,79
+17,448116,Caribbean Grilled Chicken with Herbed Rice,ok,,,36,36,0,606,700,94,Medium,High,Medium,3,5,1,79
+18,448116,Caribbean Grilled Chicken with Herbed Rice,ok,,,36,36,0,606,700,94,Medium,High,Medium,3,5,1,79
+19,330272,A2b Spl Millet Dosa,ok,,,13,13,0,430,350,80,Medium,High,Medium,3,5,0,72
+20,3368,Harissa Veg Power Bowl (W) Mock Meat,ok,,,23,23.7,0.6999999999999993,240,230,10,Medium,High,Medium,3,5,0,71
+21,1053895,Paneer Tikka Masala Bowl,ok,,,17,17,0,541,600,59,Medium,High,Medium,3,5,1,84
+22,1207447,Ragi Ghee Karam idli (3Pc),ok,,,25.5,25.5,0,513,513,0,High,High,High,3,5,0,74
+23,49189,Rooster Burger (Lettuce Wrap),ok,,,32,32,0,280,280,0,High,High,High,3,5,1,73
+24,64755,A2b Spl Veg Paya Idly,ok,,,11,11,0,370,400,30,Medium,High,Medium,3,5,0,66
+25,1051501,Harissa Paneer Burger (Lettuce Wrap),ok,,,19,20,1,340,330,10,Medium,High,Medium,3,5,1,76
+26,1051521,Peri Peri Grilled Chicken,ok,,,45,45,0,405,320,85,Medium,Medium,Medium,3,5,1,83
+27,380077,Eatright High Protein Biryani,ok,,,75,75,0,660,1500,840,Medium,High,Medium,3,5,0,81
+28,1051505,Creamy Chicken Steak,ok,,,44,44,0,410,420,10,Medium,Medium,Medium,3,5,2,77
+29,380079,Eatright High Protein Biryani,ok,,,75,75,0,660,1500,840,Medium,High,Medium,3,5,0,81
+30,47603,Harissa Paneer Burger (Lettuce Wrap),ok,,,19,20,1,340,330,10,Medium,High,Medium,3,5,1,76
+31,1026577,Frittata Burger (Lettuce Wrap),ok,,,29,28,1,250,300,50,Medium,Medium,Medium,3,5,0,71
+32,920,A2b Spl Veg Paya Idly,ok,,,11,11,0,370,400,30,Medium,High,Medium,3,5,0,66
+33,860956,A2b Spl Veg Paya Idly,ok,,,11,11,0,370,400,30,Medium,High,Medium,3,5,0,66
+34,1297326,Egg Curry and Rajma Meal,ok,,,17,30,13,280,500,220,Medium,Medium,Medium,3,5,1,80
+35,1297326,Egg Curry and Rajma Meal,ok,,,17,30,13,280,500,220,Medium,Medium,Medium,3,5,1,80
+36,12808,A2b Spl Millet Dosa,ok,,,13,13,0,430,350,80,Medium,High,Medium,3,5,0,72
+37,151218,High Protein Tandoori Chicken 2Pc,ok,,,64.8,65,0.20000000000000284,304,304,0,High,High,High,3,5,1,76
+38,1053822,Paneer Tikka Masala Bowl,ok,,,17,17,0,541,600,59,Medium,High,Medium,3,5,1,84
+39,1120923,Paneer Tikka Masala Bowl,ok,,,17,17,0,541,600,59,Medium,High,Medium,3,5,1,84
+40,223,Voodoo Spiced Prawns,ok,,,30,30,0,280,280,0,Medium,Medium,Medium,3,5,0,74
+41,513960,Ragi Ghee Karam idli (3Pc),ok,,,25.5,25.5,0,513,513,0,High,High,High,3,5,0,74
+42,1053880,Chicken Tikka Masala Bowl,ok,,,26,26,0,462,550,88,Medium,High,Medium,3,5,1,81
+43,997,A2b Spl Double Paneer Uthappam,ok,,,25,35,10,650,550,100,Medium,Medium,Medium,3,5,1,75
+44,651675,Ragi Ghee Karam idli (3Pc),ok,,,25.5,25.5,0,513,513,0,High,High,High,3,5,0,74
+45,1283857,Harissa Paneer Burger (Lettuce Wrap),ok,,,19,20,1,340,330,10,Medium,High,Medium,3,5,1,76
+46,64131,Tex Mex Burger (Lettuce Wrap),ok,,,24,24,0,200,190,10,Medium,High,Medium,3,5,1,73
+47,3369,Creole Prawn Salad (W) Mango Salsa,ok,,,23.04,23,0.03999999999999915,325,280,45,Medium,High,Medium,3,5,1,73
+48,1053795,Paneer Tikka Masala Bowl,ok,,,17,17,0,541,600,59,Medium,High,Medium,3,5,1,84
+49,1344139,Caribbean Grilled Chicken with Herbed Rice,ok,,,36,36,0,606,700,94,Medium,High,Medium,3,5,1,79
+50,1344139,Caribbean Grilled Chicken with Herbed Rice,ok,,,36,36,0,606,700,94,Medium,High,Medium,3,5,1,79
