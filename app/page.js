@@ -1,14 +1,10 @@
 import Link from "next/link";
 
 import MinimalCalculator from "@/components/minimal-calculator";
-import { getOverview } from "@/lib/portal-data";
 
 import styles from "./page.module.css";
 
 export default async function Home() {
-  const overview = await getOverview();
-  const cuisineOptions = overview.topCuisines.map((item) => item.name).filter(Boolean);
-
   return (
     <main className={styles.minimalPage}>
       <header className={styles.minimalTopbar}>
@@ -33,7 +29,7 @@ export default async function Home() {
         </p>
       </section>
 
-      <MinimalCalculator cuisineOptions={cuisineOptions} />
+      <MinimalCalculator />
 
       <section className={styles.productBand} aria-label="Scale this flow">
         <div>

@@ -40,12 +40,12 @@ The product goal is straightforward:
 The portal now accepts the Gen AI document intake shape below.
 
 Required partner inputs:
-- `RID` (numeric item ID used only for tracking)
+- `RID` (numeric restaurant ID; also retained as the result row identifier)
 - `ITEM_NAME`
 - `ITEM_PRICE` (item-level price, not restaurant-level price)
-- `ITEM_GRAMMAGE`
 
 Optional partner inputs:
+- `ITEM_GRAMMAGE`
 - `ITEM_DESCRIPTION`
 - `RX_CUISINE`
 - `MAIN_INGREDIENT_1` ... `MAIN_INGREDIENT_6`
@@ -56,9 +56,9 @@ Optional partner inputs:
 
 Backward-compatibility notes:
 - CSV parsing still reads older aliases such as `item_name`, `description`, `cuisine`, and `price`.
-- Estimation now validates that numeric `RID`, `ITEM_NAME`, `ITEM_PRICE`, and `ITEM_GRAMMAGE` are present before processing.
+- Estimation validates `RID`, `ITEM_NAME`, and `ITEM_PRICE`; grammage is optional.
 - Internal `rowId` values are still generated for UI state, but they are not treated as partner `RID`.
-- `RID` is stripped to digits during normalization and is not sent into nutrition prompts, so RID-only changes do not affect estimates.
+- `RID` is stripped to digits during normalization. In the default estimator mode it is used for result tracking only.
 
 ## Local development
 
@@ -118,12 +118,14 @@ The portal now prefers the GenAI backend when it can run:
 
 Important behavior:
 - `ITEM_PRICE` is item-level only and stays a weak contextual signal,
-- `ITEM_GRAMMAGE` is required and is used directly in the GenAI prompt,
-- ingredient cards and `INGREDIENTS_LIST` are optional but strongly recommended for custom dishes,
-- included and optional add-ons are collected through the existing component fields for backward compatibility,
+- `RID`, `ITEM_NAME`, and `ITEM_PRICE` are the three required inputs; item grammage is optional,
+- ingredient cards and explicit gram quantities in the description are passed to the estimator as structured ingredient inputs,
+- the restaurant form collects cuisine and preparation style as optional fields, with sides and add-on details in `ITEM_DESCRIPTION`; older API and upload fields remain accepted for compatibility,
 - restaurant-facing calorie output uses compact kcal display, with ranges for lower-confidence estimates,
-- final confidence is the minimum of protein and calorie confidence in GenAI mode,
+- final confidence is the lower of the protein and calorie evidence-adjusted confidence scores,
 - explicit protein or calorie values in `ITEM_DESCRIPTION` are extracted separately and do not override the estimate.
+
+Confidence starts from the model's separate protein and energy assessments, then moves toward an evidence-support score based on similar labeled items, relevant ICMR matches, explicit ingredient quantities, serving grammage, and available menu context. This is a heuristic, not a benchmark-calibrated probability. Entries can be logged only when final confidence is at least 70%.
 
 ## Output contract
 
@@ -154,6 +156,30 @@ Use `.env.example` as the starting point:
 - `OPENAI_RESPONSES_MODEL`: defaults to `gpt-4.1-mini`
 - `OPENAI_EMBEDDING_MODEL`: defaults to `text-embedding-3-small`
 - `OPENAI_ORGANIZATION` and `OPENAI_PROJECT`: optional
+
+## Google Sheets logging
+
+The single-item form sends qualifying submissions through the server-side `/api/log` route. To connect the supplied spreadsheet:
+
+1. Open the spreadsheet and choose **Extensions → Apps Script**.
+2. Paste `scripts/google-sheets-logger.gs` into the Apps Script editor.
+3. In **Project Settings → Script Properties**, add `LOG_WEBHOOK_TOKEN` with a long random value.
+4. Deploy the script as a web app that runs as the spreadsheet owner. Copy the deployment URL.
+5. Set `GOOGLE_SHEETS_WEBHOOK_URL` to that URL and `GOOGLE_SHEETS_WEBHOOK_TOKEN` to the same token in the app's server environment.
+
+The script creates a `Submissions` tab with headers on its first successful write. Both the app route and the script enforce the 70% confidence threshold. Keep the token in server-side environment settings only.
+
+## RID and price retrieval
+
+The default estimator uses ICMR embedding matching and retrieves from the semantic top eight, then reranks those candidates using the RID-mapped RX restaurant category and item-price similarity. Same-category and similarly priced dishes can rank higher among the candidates sent to the estimator. The category is also provided as restaurant context to the LLM. Unknown RIDs receive no category preference; price reranking and ICMR embedding retrieval still work. This mode improves retrieval context and categorization; it does not claim to estimate serving weight in grams.
+
+RID-to-RX category prioritization is enabled by default. Set `RID_RX_CATEGORY_MODE=0` to explicitly disable it. The runtime resolves RID through `app-data/rid-rx-classifier.bin.gz`; this packaged mapping asset must be included in the deployment. The source mapping CSV is not required at runtime.
+
+The mapping asset can be rebuilt from the partner CSV with `python3 scripts/build_rid_rx_mapping.py INPUT.csv app-data/rid-rx-classifier.bin.gz`. The benchmark runner supports `BENCHMARK_EXPECT_RETRIEVAL_MODE=price_top8` or `rid_rx_category_and_price_top8` to assert which mode the API actually used.
+
+The `dataset_test.xlsx` benchmark passes descriptions through unchanged by default, matching the normal prediction input. Set `BENCHMARK_STRIP_NUTRITION_FROM_DESCRIPTION=1` only when intentionally measuring performance with explicit nutrition claims removed.
+
+`node scripts/benchmark_portion_prior.mjs` runs a deterministic grouped holdout on the packaged 8,152-record reference corpus. It excludes held-out dish names from fitting and retrieval and excludes held-out name groups whose descriptions contain explicit nutrition values. This is a reference-corpus ablation benchmark, not a comparison against live GenAI API predictions.
 
 ## Why this portal exists
 

@@ -31,28 +31,18 @@ export default async function DocsPage() {
   const ownerTips = [
     {
       step: "01",
-      title: "Always complete the 4 mandatory fields",
-      detail: "Numeric RID, ITEM_NAME, ITEM_PRICE, and ITEM_GRAMMAGE block the run if they are missing.",
+      title: "Complete the three required fields",
+      detail: "Numeric RID, item name, and item price are required. Grammage is optional.",
     },
     {
       step: "02",
-      title: "Write descriptions like operator notes",
-      detail: "Prefer key ingredients with grams, not marketing blurbs.",
+      title: "Include useful details in the description",
+      detail: "Add ingredients with gram quantities, cuisine, preparation style, sides, and included or optional add-ons under Additional information.",
     },
     {
       step: "03",
-      title: "Use ingredient cards and add-ons for non-trivial dishes",
-      detail: "Curries, combos, bowls, wraps, and platters usually estimate better when ingredients and add-ons are added.",
-    },
-    {
-      step: "04",
-      title: "Use cuisine only when the restaurant already uses it",
-      detail: "Cuisine is optional context, not a substitute for ingredients.",
-    },
-    {
-      step: "05",
-      title: "Inspect internal logic only when confidence drops",
-      detail: "The internal logic panel is for operators, not partner-facing output.",
+      title: "Add ingredient cards when quantities need more space",
+      detail: "Description entries with explicit gram amounts are also extracted into the structured ingredient list.",
     },
   ];
 
@@ -85,12 +75,12 @@ export default async function DocsPage() {
             <article className={styles.workflowCard}>
               <span>01</span>
               <h3>Capture the mandatory row</h3>
-              <p>Numeric RID, ITEM_NAME, ITEM_PRICE, and ITEM_GRAMMAGE are always required.</p>
+              <p>Numeric RID, item name, and item price are required. Item grammage is optional.</p>
             </article>
             <article className={styles.workflowCard}>
               <span>02</span>
               <h3>Enrich with ingredients and operator notes</h3>
-              <p>Ingredient cards, add-ons, cuisine, and short descriptions improve dish identity.</p>
+              <p>Ingredient cards and a detailed description give the estimator useful dish and portion context.</p>
             </article>
             <article className={styles.workflowCard}>
               <span>03</span>
@@ -104,7 +94,7 @@ export default async function DocsPage() {
           <div className={styles.sectionHeading}>
             <span className={styles.kicker}>Confidence guide</span>
             <h2>How to decide what can move forward.</h2>
-            <p>Confidence is an operator workflow tool. It tells the team where human review is still needed.</p>
+            <p>Confidence reflects the model assessment and available evidence support. Log submission opens at 70% or above.</p>
           </div>
           <div className={styles.confidenceGrid}>
             {confidenceGuide.map((item) => (

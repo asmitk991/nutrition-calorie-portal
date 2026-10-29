@@ -34,6 +34,8 @@ import * as XLSX from "xlsx";
 // your CSV's header, right side is the app's field name.
 const COLUMN_OVERRIDES = {
   RESTAURANT_ID: "RID",
+  REST_ID: "RID",
+  RX_CLASIFIER: "RX_CLASSIFIER",
 };
 
 // Column(s) the app reads for plated weight. The app itself already accepts
@@ -42,12 +44,25 @@ const COLUMN_OVERRIDES = {
 const GRAMMAGE_KEYS = ["ITEM_GRAMMAGE", "item_grammage", "GRAMMAGE", "grammage"];
 
 // Ground truth columns, confirmed against the actual test file. First match wins.
-const GROUND_TRUTH_PROTEIN_KEYS = ["PROTEIN_GM", "PROTEIN_G", "protein_gm", "protein_g"];
-const GROUND_TRUTH_ENERGY_KEYS = ["ENERGY_KCAL", "energy_kcal", "CALORIES", "calories"];
+const GROUND_TRUTH_PROTEIN_KEYS = [
+  "PROTEIN_GM",
+  "PROTEIN_G",
+  "PROTEIN_VALUE_IN_GRAM",
+  "protein_gm",
+  "protein_g",
+];
+const GROUND_TRUTH_ENERGY_KEYS = [
+  "ENERGY_KCAL",
+  "energy_kcal",
+  "CALORIES",
+  "CALORIE_VALUE_IN_KCAL",
+  "calories",
+];
 
 const API_URL = process.env.BENCHMARK_API_URL || "http://localhost:3000/api/estimate";
 const BATCH_SIZE = 50; // matches the API's hard per-request cap, do not raise this
-const OUTPUT_CSV = "benchmark_results.csv";
+const OUTPUT_CSV = process.env.BENCHMARK_OUTPUT_CSV || "benchmark_results.csv";
+const STRIP_BENCHMARK_NUTRITION = process.env.BENCHMARK_STRIP_NUTRITION_FROM_DESCRIPTION === "1";
 const REFERENCE_CORPUS_PATH = path.resolve("app-data/genai-reference-records.json");
 
 // ---------------------------------------------------------------------------
@@ -69,6 +84,24 @@ function firstNumericMatch(row, keys) {
   return Number.isFinite(numeric) ? numeric : null;
 }
 
+function serializeReferenceItems(items) {
+  if (!Array.isArray(items) || !items.length) return "";
+  return JSON.stringify(items.map((item, index) => ({
+    rank: index + 1,
+    name: item.ITEM_NAME ?? null,
+    dish_type: item.DISH_TYPE ?? null,
+    dish_family: item.DISH_FAMILY ?? null,
+    classifier: item.RX_CLASSIFIER ?? null,
+    item_price: item.ITEM_PRICE ?? null,
+    protein_g: item.PROTEIN_GM ?? null,
+    energy_kcal: item.ENERGY_KCAL ?? null,
+    semantic_score: item.retrieval_score ?? null,
+    reranked_score: item.final_score ?? null,
+    price_boost: item.price_rerank_boost ?? null,
+    category_boost: item.category_rerank_boost ?? null,
+  })));
+}
+
 function applyColumnOverrides(row) {
   const mapped = { ...row };
   for (const [from, to] of Object.entries(COLUMN_OVERRIDES)) {
@@ -81,6 +114,16 @@ function applyColumnOverrides(row) {
 
 function normalizeName(value = "") {
   return String(value).trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+function stripExplicitNutrition(description = "") {
+  return String(description)
+    .replace(/\b\d+(?:\.\d+)?\s*(?:g|gm|grams?)\s*(?:of\s*)?protein\b/gi, "")
+    .replace(/\bprotein\b[^\d\n]{0,16}\d+(?:\.\d+)?\s*(?:g|gm|grams?)?\b/gi, "")
+    .replace(/\b\d+(?:\.\d+)?\s*(?:kcal|kcals|calories?)\b/gi, "")
+    .replace(/\b(?:energy|calories?)\b[^\d\n]{0,16}\d+(?:\.\d+)?\s*(?:kcal|kcals)?\b/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function loadReferenceNameSet() {
@@ -104,6 +147,15 @@ function mean(list) {
 function rmse(list) {
   if (!list.length) return null;
   return Math.sqrt(list.reduce((sum, value) => sum + value ** 2, 0) / list.length);
+}
+
+// MAPE: skips entries where actual is 0 to avoid division by zero.
+// Returns a percentage (e.g. 15.3 means 15.3%).
+function mape(absErrors, actuals) {
+  const pctErrors = absErrors
+    .map((absErr, index) => (actuals[index] !== 0 ? (absErr / Math.abs(actuals[index])) * 100 : null))
+    .filter((value) => value !== null);
+  return pctErrors.length ? mean(pctErrors) : null;
 }
 
 async function postBatch(items) {
@@ -161,6 +213,7 @@ async function main() {
 
   const loadedRows = loadRowsFromFile(csvPath).map(applyColumnOverrides);
   console.log(`Loaded ${loadedRows.length} rows from ${csvPath}.`);
+  console.log(`Explicit nutrition text stripped from descriptions: ${STRIP_BENCHMARK_NUTRITION ? "yes" : "no"}`);
 
   // Tag every row with its original file position before any filtering, so
   // row_number in the final output always traces back to the source file,
@@ -262,7 +315,11 @@ async function main() {
       actualEnergyKcal,
     });
 
-    return { ...row, rowId };
+    return {
+      ...row,
+      ITEM_DESCRIPTION: STRIP_BENCHMARK_NUTRITION ? stripExplicitNutrition(row.ITEM_DESCRIPTION || "") : row.ITEM_DESCRIPTION,
+      rowId,
+    };
   });
 
   const missingGroundTruth = [...groundTruthById.values()].filter(
@@ -286,6 +343,7 @@ async function main() {
   const allResults = [];
   const failedRowIds = [];
   let icmrMatchModeSeen = null;
+  const retrievalModesSeen = new Set();
   const totalBatches = Math.ceil(itemsToSend.length / BATCH_SIZE);
 
   for (let i = 0; i < itemsToSend.length; i += BATCH_SIZE) {
@@ -304,6 +362,9 @@ async function main() {
     if (result.payload?.estimator?.icmrMatchMode) {
       icmrMatchModeSeen = result.payload.estimator.icmrMatchMode;
     }
+    if (result.payload?.estimator?.retrievalMode) {
+      retrievalModesSeen.add(result.payload.estimator.retrievalMode);
+    }
   }
 
   if (failedRowIds.length) {
@@ -311,6 +372,25 @@ async function main() {
   }
 
   console.log(`Received ${allResults.length} results. Scoring against ground truth...`);
+
+  const retrievalModeLabel = [...retrievalModesSeen].join(", ") || "not reported by API";
+  console.log(`Retrieval mode reported by API: ${retrievalModeLabel}`);
+  const nutrientSpecificReferenceRows = allResults.filter((result) =>
+    Array.isArray(result.explainability?.retrieval?.protein_neighbors) &&
+    Array.isArray(result.explainability?.retrieval?.energy_neighbors)
+  ).length;
+  console.log(`Rows with separate protein and energy reference lists: ${nutrientSpecificReferenceRows} of ${allResults.length}`);
+  const expectedRetrievalMode = process.env.BENCHMARK_EXPECT_RETRIEVAL_MODE;
+  if (expectedRetrievalMode && (
+    retrievalModesSeen.size !== 1 ||
+    !retrievalModesSeen.has(expectedRetrievalMode)
+  )) {
+    console.error(
+      `Benchmark stopped: expected retrieval mode "${expectedRetrievalMode}" but API reported "${retrievalModeLabel}". ` +
+      `Check the Terminal 1 server, its port, and RID_RX_CATEGORY_MODE.`
+    );
+    process.exit(1);
+  }
 
   // Rows that came back with a 200 but individually failed estimation look
   // structurally different, no estimated_protein_g, no confidence_band, no
@@ -347,6 +427,16 @@ async function main() {
         ? Math.abs(predictedEnergyKcal - truth.actualEnergyKcal)
         : null;
 
+    // Per-row percentage errors (null if actual is 0 or either value is missing).
+    const proteinPctError =
+      proteinAbsError != null && truth.actualProteinG !== 0
+        ? (proteinAbsError / Math.abs(truth.actualProteinG)) * 100
+        : null;
+    const energyPctError =
+      energyAbsError != null && truth.actualEnergyKcal !== 0
+        ? (energyAbsError / Math.abs(truth.actualEnergyKcal)) * 100
+        : null;
+
     return {
       row_number: truth.rowNumber ?? null,
       rid: result.row_id,
@@ -357,13 +447,20 @@ async function main() {
       actual_protein_g: truth.actualProteinG ?? null,
       predicted_protein_g: predictedProteinG ?? null,
       protein_abs_error: proteinAbsError,
+      protein_pct_error: proteinPctError != null ? parseFloat(proteinPctError.toFixed(2)) : null,
       actual_energy_kcal: truth.actualEnergyKcal ?? null,
       predicted_energy_kcal: predictedEnergyKcal ?? null,
       energy_abs_error: energyAbsError,
+      energy_pct_error: energyPctError != null ? parseFloat(energyPctError.toFixed(2)) : null,
       confidence_band: result.confidence_band ?? null,
       protein_confidence_band: result.output?.confidence_detail?.protein_confidence?.band ?? null,
       energy_confidence_band: result.output?.confidence_detail?.energy_confidence?.band ?? null,
       similar_items_found: result.explainability?.retrieval?.neighbors?.length ?? 0,
+      nutrient_specific_reference_status: Array.isArray(result.explainability?.retrieval?.protein_neighbors) &&
+        Array.isArray(result.explainability?.retrieval?.energy_neighbors) ? "available" : "not_enabled",
+      selected_reference_items: serializeReferenceItems(result.explainability?.retrieval?.neighbors),
+      protein_reference_items: serializeReferenceItems(result.explainability?.retrieval?.protein_neighbors),
+      energy_reference_items: serializeReferenceItems(result.explainability?.retrieval?.energy_neighbors),
       active_menu_hits: result.explainability?.retrieval?.active_menu_context?.length ?? 0,
       icmr_hits: result.explainability?.retrieval?.icmr_matches?.length ?? 0,
       top_similarity_percent: result.explainability?.scoring_snapshot?.top_neighbor_similarity ?? null,
@@ -371,7 +468,12 @@ async function main() {
   });
 
   const withProteinError = scored.filter((r) => r.protein_abs_error != null).map((r) => r.protein_abs_error);
+  const withProteinActual = scored.filter((r) => r.protein_abs_error != null).map((r) => r.actual_protein_g);
   const withEnergyError = scored.filter((r) => r.energy_abs_error != null).map((r) => r.energy_abs_error);
+  const withEnergyActual = scored.filter((r) => r.energy_abs_error != null).map((r) => r.actual_energy_kcal);
+
+  const proteinMape = mape(withProteinError, withProteinActual);
+  const energyMape = mape(withEnergyError, withEnergyActual);
 
   const zeroHitRate = (key) =>
     scored.length ? (scored.filter((r) => r[key] === 0).length / scored.length) * 100 : null;
@@ -390,12 +492,12 @@ async function main() {
   console.log(
     `Protein: MAE ${mean(withProteinError)?.toFixed(2) ?? "n/a"} g, RMSE ${
       rmse(withProteinError)?.toFixed(2) ?? "n/a"
-    } g, n=${withProteinError.length}`
+    } g, MAPE ${proteinMape?.toFixed(2) ?? "n/a"}%, n=${withProteinError.length}`
   );
   console.log(
     `Energy:  MAE ${mean(withEnergyError)?.toFixed(2) ?? "n/a"} kcal, RMSE ${
       rmse(withEnergyError)?.toFixed(2) ?? "n/a"
-    } kcal, n=${withEnergyError.length}`
+    } kcal, MAPE ${energyMape?.toFixed(2) ?? "n/a"}%, n=${withEnergyError.length}`
   );
   console.log(`Rows with zero active menu retrieval hits: ${zeroHitRate("active_menu_hits")?.toFixed(1) ?? "n/a"}%`);
   console.log(`Rows with zero ICMR retrieval hits: ${zeroHitRate("icmr_hits")?.toFixed(1) ?? "n/a"}%`);

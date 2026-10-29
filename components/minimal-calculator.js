@@ -28,7 +28,7 @@ function formatIngredientList(ingredients = []) {
     .join(", ");
 }
 
-export default function MinimalCalculator({ cuisineOptions = [] }) {
+export default function MinimalCalculator() {
   const [form, setForm] = useState(() => ({
     rid: "",
     name: "",
@@ -36,21 +36,30 @@ export default function MinimalCalculator({ cuisineOptions = [] }) {
     grammage: "",
     description: "",
     cuisine: "",
-    compulsoryComponents: "",
-    optionalComponents: "",
+    preparationStyle: "",
     ingredients: [createEmptyIngredient()],
   }));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
   const [estimatorMeta, setEstimatorMeta] = useState(null);
-  const [showInternal, setShowInternal] = useState(false);
+  const [logging, setLogging] = useState(false);
+  const [logStatus, setLogStatus] = useState(null);
+
+  function invalidateEstimate() {
+    setResult(null);
+    setEstimatorMeta(null);
+    setLogStatus(null);
+    setError(null);
+  }
 
   function updateField(key, value) {
+    invalidateEstimate();
     setForm((current) => ({ ...current, [key]: key === "rid" ? sanitizeRid(value) : value }));
   }
 
   function updateIngredient(index, key, value) {
+    invalidateEstimate();
     setForm((current) => ({
       ...current,
       ingredients: current.ingredients.map((ingredient, ingredientIndex) =>
@@ -60,6 +69,7 @@ export default function MinimalCalculator({ cuisineOptions = [] }) {
   }
 
   function addIngredient() {
+    invalidateEstimate();
     setForm((current) => ({
       ...current,
       ingredients: [...current.ingredients, createEmptyIngredient()],
@@ -67,6 +77,7 @@ export default function MinimalCalculator({ cuisineOptions = [] }) {
   }
 
   function removeIngredient(index) {
+    invalidateEstimate();
     setForm((current) => {
       const nextIngredients = current.ingredients.filter((_, ingredientIndex) => ingredientIndex !== index);
 
@@ -106,8 +117,7 @@ export default function MinimalCalculator({ cuisineOptions = [] }) {
               ITEM_GRAMMAGE: form.grammage.trim(),
               ITEM_DESCRIPTION: form.description.trim(),
               RX_CUISINE: form.cuisine.trim(),
-              COMPULSORY_COMPONENTS: form.compulsoryComponents.trim(),
-              OPTIONAL_COMPONENTS: form.optionalComponents.trim(),
+              DISH_PREPARATION_STYLE: form.preparationStyle.trim(),
               ingredients: form.ingredients
                 .map((ingredient) => ({
                   name: ingredient.name.trim(),
@@ -131,11 +141,57 @@ export default function MinimalCalculator({ cuisineOptions = [] }) {
 
       setResult(firstResult);
       setEstimatorMeta(data.estimator || null);
-      setShowInternal(false);
+      setLogStatus(null);
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "Something went wrong.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleLog() {
+    const confidence = Number(result?.confidence_percent);
+    if (!result || !Number.isFinite(confidence) || confidence < 70 || logging) return;
+
+    setLogging(true);
+    setLogStatus(null);
+    try {
+      const response = await fetch("/api/log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          input: {
+            rid: form.rid.trim(),
+            name: form.name.trim(),
+            price: form.price.trim(),
+            grammage: form.grammage.trim(),
+            description: form.description.trim(),
+            cuisine: form.cuisine.trim(),
+            preparation_style: form.preparationStyle.trim(),
+            ingredients: form.ingredients
+              .map((ingredient) => ({ name: ingredient.name.trim(), grammage: ingredient.grammage.trim() }))
+              .filter((ingredient) => ingredient.name || ingredient.grammage),
+          },
+          estimate: {
+            estimated_energy_kcal: result.estimated_energy_kcal,
+            estimated_protein_g: result.estimated_protein_g,
+            confidence_percent: confidence,
+            confidence_band: result.estimation_confidence,
+            reasoning_trace: result.reasoning_trace || "",
+          },
+          estimator: estimatorMeta?.engine || "GenAI",
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.error || "The entry could not be logged.");
+      setLogStatus({ type: "success", message: "Entry logged for review." });
+    } catch (requestError) {
+      setLogStatus({
+        type: "error",
+        message: requestError instanceof Error ? requestError.message : "The entry could not be logged.",
+      });
+    } finally {
+      setLogging(false);
     }
   }
 
@@ -147,14 +203,13 @@ export default function MinimalCalculator({ cuisineOptions = [] }) {
       grammage: "",
       description: "",
       cuisine: "",
-      compulsoryComponents: "",
-      optionalComponents: "",
+      preparationStyle: "",
       ingredients: [createEmptyIngredient()],
     });
     setResult(null);
     setEstimatorMeta(null);
     setError(null);
-    setShowInternal(false);
+    setLogStatus(null);
   }
 
   return (
@@ -163,149 +218,123 @@ export default function MinimalCalculator({ cuisineOptions = [] }) {
         <div className={styles.headerBlock}>
           <span className={styles.eyebrow}>Item estimate</span>
           <h2>Enter the menu item exactly as the restaurant sells it.</h2>
-          <p>
-            Required fields identify the item and portion. Optional ingredients and add-ons improve the estimate when
-            the item name is not enough.
-          </p>
+          <p>Enter the required item details to get an estimate.</p>
         </div>
 
-        <div className={styles.requiredGrid}>
-          <Field
-            label="RID"
-            required
-            value={form.rid}
-            placeholder="1001"
-            helper="Numeric item ID for tracking only."
-            inputMode="numeric"
-            onChange={(value) => updateField("rid", value)}
-          />
-          <Field
-            label="Item name"
-            required
-            value={form.name}
-            placeholder="Paneer Butter Masala"
-            helper="Customer-facing dish name."
-            onChange={(value) => updateField("name", value)}
-          />
-          <Field
-            label="Item price"
-            required
-            value={form.price}
-            placeholder="250"
-            helper="Selling price for this dish only."
-            inputMode="decimal"
-            onChange={(value) => updateField("price", value)}
-          />
-          <Field
-            label="Item grammage"
-            required={false}
-            value={form.grammage}
-            placeholder="320"
-            helper="Approximate total plated weight in grams (optional)."
-            inputMode="decimal"
-            onChange={(value) => updateField("grammage", value)}
-          />
-        </div>
-
-        <div className={styles.optionalSection}>
-          <div className={styles.sectionHeader}>
-            <span className={styles.sectionTag}>Optional</span>
-            <strong>Add context only where it improves the estimate.</strong>
+        <section className={styles.requiredSection} aria-labelledby="required-fields-heading">
+          <h3 id="required-fields-heading" className={styles.requiredHeading}>Required fields</h3>
+          <div className={styles.requiredGrid}>
+            <Field
+              label="RID"
+              required
+              value={form.rid}
+              placeholder="1001"
+              helper="Numeric item ID for tracking only."
+              inputMode="numeric"
+              onChange={(value) => updateField("rid", value)}
+            />
+            <Field
+              label="Item name"
+              required
+              value={form.name}
+              placeholder="Paneer Butter Masala"
+              helper="Customer-facing dish name."
+              onChange={(value) => updateField("name", value)}
+            />
+            <Field
+              label="Item price"
+              required
+              value={form.price}
+              placeholder="250"
+              helper="Selling price for this dish only."
+              inputMode="decimal"
+              onChange={(value) => updateField("price", value)}
+            />
           </div>
+        </section>
 
+        <details className={styles.optionalSection}>
+          <summary className={styles.disclosureSummary}>Additional information <span>Optional</span></summary>
+          <p className={styles.sectionNote}>Add any details you have to improve the estimate.</p>
           <div className={styles.optionalGrid}>
+            <Field
+              label="Item grammage"
+              value={form.grammage}
+              placeholder="320"
+              helper="Approximate total plated weight in grams."
+              inputMode="decimal"
+              onChange={(value) => updateField("grammage", value)}
+            />
+            <Field
+              label="Cuisine"
+              value={form.cuisine}
+              placeholder="North Indian"
+              helper="Optional cuisine or food style."
+              onChange={(value) => updateField("cuisine", value)}
+            />
+            <Field
+              label="Dish preparation style"
+              value={form.preparationStyle}
+              placeholder="Grilled, fried, steamed"
+              helper="How the dish is cooked."
+              onChange={(value) => updateField("preparationStyle", value)}
+            />
             <Field
               label="Short description"
               value={form.description}
-              placeholder="Paneer 120 g, tomato gravy 150 g, butter 20 g."
-              helper="Operator note only. Prefer ingredients with grams over marketing copy."
+              placeholder="Paneer 120 g; tomato gravy 150 g; butter 20 g. Served with salad and raita."
+              helper="Include ingredients and quantities, sides, or any included or optional add-ons."
               as="textarea"
               full
               onChange={(value) => updateField("description", value)}
             />
-            <label className={styles.field}>
-              <span className={styles.labelRow}>
-                <span>Cuisine</span>
-                <span className={styles.optionalBadge}>Optional</span>
-              </span>
-              <select value={form.cuisine} onChange={(event) => updateField("cuisine", event.target.value)}>
-                <option value="">Select cuisine</option>
-                {cuisineOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-              <small>Optional cuisine tag if the restaurant already classifies dishes this way.</small>
-            </label>
-            <Field
-              label="Included add-ons"
-              value={form.compulsoryComponents}
-              placeholder="Paneer cubes, gravy"
-              helper="Add-ons or sides that always come with the dish."
-              as="textarea"
-              onChange={(value) => updateField("compulsoryComponents", value)}
-            />
-            <Field
-              label="Optional add-ons"
-              value={form.optionalComponents}
-              placeholder="Onion salad, pickle"
-              helper="Add-ons or accompaniments the customer may choose."
-              as="textarea"
-              onChange={(value) => updateField("optionalComponents", value)}
-            />
-          </div>
-        </div>
-
-        <div className={styles.cartSection}>
-          <div className={styles.sectionHeader}>
-            <span className={styles.sectionTag}>Ingredients</span>
-            <strong>Add the main ingredients if the dish has a custom build.</strong>
-          </div>
-          <p className={styles.sectionNote}>
-            Keep this short: ingredient name and approximate grams. Skip this for simple, obvious menu items.
-          </p>
-
-          <div className={styles.cardList}>
-            {form.ingredients.map((ingredient, index) => (
-              <article key={`ingredient-${index}`} className={styles.ingredientCard}>
-                <Field
-                  label={`Ingredient ${index + 1}`}
-                  value={ingredient.name}
-                  placeholder="Paneer"
-                  helper="Main ingredient name."
-                  onChange={(value) => updateIngredient(index, "name", value)}
-                />
-                <Field
-                  label="Grammage"
-                  value={ingredient.grammage}
-                  placeholder="50"
-                  helper="Approximate grams for this ingredient."
-                  inputMode="decimal"
-                  onChange={(value) => updateIngredient(index, "grammage", value)}
-                />
-                <button
-                  type="button"
-                  className={styles.secondaryButton}
-                  onClick={() => removeIngredient(index)}
-                  disabled={form.ingredients.length === 1 && !ingredient.name && !ingredient.grammage}
-                >
-                  Remove
-                </button>
-              </article>
-            ))}
           </div>
 
-          <div className={styles.actionRow}>
-            <button type="button" className={styles.secondaryButton} onClick={addIngredient}>
-              Add ingredient
-            </button>
-            <div className={styles.cartSummary}>
-              <span>Ingredient summary</span>
-              <strong>{formatIngredientList(form.ingredients)}</strong>
+          <details className={styles.ingredientsDisclosure}>
+            <summary className={styles.disclosureSummary}>Ingredients <span>Optional</span></summary>
+            <p className={styles.sectionNote}>Add main ingredients and approximate grams when the dish has a custom build.</p>
+
+            <div className={styles.cardList}>
+              {form.ingredients.map((ingredient, index) => (
+                <article key={`ingredient-${index}`} className={styles.ingredientCard}>
+                  <Field
+                    label={`Ingredient ${index + 1}`}
+                    value={ingredient.name}
+                    placeholder="Paneer"
+                    helper="Main ingredient name."
+                    onChange={(value) => updateIngredient(index, "name", value)}
+                  />
+                  <Field
+                    label="Grammage"
+                    value={ingredient.grammage}
+                    placeholder="50"
+                    helper="Approximate grams for this ingredient."
+                    inputMode="decimal"
+                    onChange={(value) => updateIngredient(index, "grammage", value)}
+                  />
+                  <button
+                    type="button"
+                    className={styles.secondaryButton}
+                    onClick={() => removeIngredient(index)}
+                    disabled={form.ingredients.length === 1 && !ingredient.name && !ingredient.grammage}
+                  >
+                    Remove
+                  </button>
+                </article>
+              ))}
             </div>
-          </div>
-        </div>
+
+            <div className={styles.actionRow}>
+              <button type="button" className={styles.secondaryButton} onClick={addIngredient}>
+                Add ingredient
+              </button>
+              <div className={styles.cartSummary}>
+                <span>Ingredient summary</span>
+                <strong>{formatIngredientList(form.ingredients)}</strong>
+              </div>
+            </div>
+          </details>
+        </details>
 
         {error ? (
           <p className={styles.error} role="alert">
@@ -327,8 +356,9 @@ export default function MinimalCalculator({ cuisineOptions = [] }) {
         <ResultCard
           result={result}
           estimatorMeta={estimatorMeta}
-          showInternal={showInternal}
-          onToggleInternal={() => setShowInternal((open) => !open)}
+          logging={logging}
+          logStatus={logStatus}
+          onLog={handleLog}
           onReset={handleReset}
         />
       ) : null}
@@ -368,14 +398,16 @@ function Field({
   );
 }
 
-function ResultCard({ result, estimatorMeta, showInternal, onToggleInternal, onReset }) {
+function ResultCard({ result, estimatorMeta, logging, logStatus, onLog, onReset }) {
   const confidenceLabel = humanizeConfidence(result.estimation_confidence);
   const confidencePercent =
     typeof result.confidence_percent === "number" ? `${Math.round(result.confidence_percent)}%` : null;
+  const canLog =
+    typeof result.confidence_percent === "number" &&
+    result.confidence_percent >= 70 &&
+    Number.isFinite(Number(result.estimated_protein_g)) &&
+    Number.isFinite(Number(result.estimated_energy_kcal));
   const reasoning = result.reasoning_trace || result.rationale || null;
-  const activeContext =
-    result.explainability?.retrieval?.active_menu_context?.map((candidate) => candidate.display_name).filter(Boolean) ||
-    [];
 
   return (
     <article className={styles.resultCard} aria-live="polite">
@@ -414,49 +446,22 @@ function ResultCard({ result, estimatorMeta, showInternal, onToggleInternal, onR
 
       <div className={styles.resultFooter}>
         <span className={styles.engineBadge}>Engine: {estimatorMeta?.engine || "GenAI"}</span>
-        <button type="button" className={styles.linkButton} onClick={onToggleInternal}>
-          {showInternal ? "Hide internal logic" : "Show internal logic"}
+        <button type="button" className={styles.primaryButton} onClick={onLog} disabled={!canLog || logging}>
+          {logging ? "Logging..." : "Log entry"}
         </button>
         <button type="button" className={styles.linkButton} onClick={onReset}>
           Build another dish
         </button>
       </div>
-
-      {showInternal ? (
-        <div className={styles.internalPanel}>
-          <div className={styles.internalGrid}>
-            <div>
-              <strong>Signals checked</strong>
-              <p>{formatList(result.explainability?.inputs?.signals_checked_by_genai, "ITEM_NAME")}</p>
-            </div>
-            <div>
-              <strong>Signals that helped</strong>
-              <p>{formatList(result.explainability?.inputs?.signals_that_helped_this_match, "ITEM_NAME")}</p>
-            </div>
-            <div>
-              <strong>Labeled nutrition references</strong>
-              <p>
-                {formatList(
-                  result.explainability?.retrieval?.neighbors?.map((neighbor) => neighbor.ITEM_NAME).filter(Boolean),
-                  "None"
-                )}
-              </p>
-            </div>
-            <div>
-              <strong>April 20 active-menu context</strong>
-              <p>{formatList(activeContext, "None")}</p>
-            </div>
-            <div>
-              <strong>Price note</strong>
-              <p>{result.explainability?.price_signal?.note || "Not available"}</p>
-            </div>
-            <div>
-              <strong>Input ingredients</strong>
-              <p>{formatIngredientList(result.input_ingredients)}</p>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <p
+        className={`${styles.logGuidance} ${logStatus?.type === "error" ? styles.logError : ""} ${logStatus?.type === "success" ? styles.logSuccess : ""}`}
+        role="status"
+      >
+        {logStatus?.message ||
+          (canLog
+            ? "This estimate meets the 70% confidence threshold for logging."
+            : "Logging is available when a complete estimate reaches 70% confidence.")}
+      </p>
     </article>
   );
 }
@@ -468,8 +473,4 @@ function humanizeConfidence(value) {
   if (normalized.includes("med")) return "Medium";
   if (normalized.includes("low")) return "Low";
   return value;
-}
-
-function formatList(values, emptyLabel = "None") {
-  return values?.length ? values.join(", ") : emptyLabel;
 }
